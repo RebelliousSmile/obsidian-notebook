@@ -1,0 +1,46 @@
+// What the Style Settings presets did besides setting variables.
+//
+// The presets carried 32 keys that were not values: toggles and selectors of
+// the Border theme. Most of them only spoke to Border — its heading gutter
+// indicators, its editor grid pattern, its card layout, its enhanced outline,
+// its new-tab image, its immersive canvas, its media-embed borders, its split
+// background selectors, its focus mode, its custom callout style. With the
+// dependency gone they have no object: nothing draws those decorations on
+// another theme, so nothing here switches them off.
+//
+// Three of them survive because they change something a plain Obsidian sees.
+
+// The root split background has no Obsidian variable of its own — it falls
+// back to the note background. A pack that wants a different paper behind the
+// notes writes `--brumes-root-split-background` in its workspace layer, and
+// the fallback keeps the default behaviour when it writes nothing.
+.workspace-split.mod-root {
+	background-color: var(
+		--brumes-root-split-background,
+		var(--background-primary)
+	);
+}
+
+.brumes--legend-in-the-mist {
+	// `img-center-align`: the game's illustrations are plates, not inline
+	// figures. They stay centred whatever the installed theme does.
+	.markdown-rendered img:not([width]):not(.emoji):not(.cm-widgetBuffer) {
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
+
+.brumes--city-of-mist {
+	// `colorful-checkbox` off and `disable-alternative-checkboxes` on: a plain
+	// Obsidian tints alternative task markers by type. The game keeps a single
+	// checkbox colour, the one written by its pack.
+	li[data-task]:not([data-task=" "]) > .task-list-item-checkbox {
+		border-color: var(--checkbox-color);
+		color: var(--checkbox-color);
+	}
+
+	li[data-task]:not([data-task=" "]) > .task-list-item-checkbox:checked {
+		background-color: var(--checkbox-color);
+	}
+}

@@ -1,0 +1,29 @@
+// A note-local image replaces the game's page texture. It is painted on its
+// own layer so that its opacity never fades the editor or rendered content.
+.workspace-leaf-content.brumes-note-background {
+	.markdown-source-view,
+	.markdown-reading-view {
+		position: relative;
+		isolation: isolate;
+		background-image: none !important;
+
+		&::before {
+			position: absolute;
+			z-index: 0;
+			inset: 0;
+			background-image: var(--brumes-note-background-image);
+			background-position: var(--brumes-note-background-position);
+			background-repeat: var(--brumes-note-background-repeat);
+			background-size: var(--brumes-note-background-size);
+			content: "";
+			opacity: var(--brumes-note-background-opacity);
+			pointer-events: none;
+		}
+	}
+
+	.markdown-source-view > .cm-editor,
+	.markdown-reading-view > .markdown-preview-sizer {
+		position: relative;
+		z-index: 1;
+	}
+}

@@ -1,0 +1,26 @@
+// Every typeface the plugin carries, in one place.
+//
+// They used to be pulled in by the game index that happened to need them
+// first, which made a game's typography depend on another game's imports:
+// :Otherscape asks for three faces it never declared, and would have lost
+// them the day City of Mist stopped using them. `@font-face` is global to the
+// document anyway, so the honest shape is a single list the whole stylesheet
+// loads, whichever game is on.
+//
+// A pack that wants a face the plugin does not carry declares it in its
+// `assets.fonts`, and the plugin loads it from the vault at runtime. One
+// typeface went out that way in phase 4: PragRoman is free to use but its
+// licence forbids including it in a product, so the plugin no longer carries
+// it and asks for it instead. Frederick Text left too, and for good: no rule
+// asked for it any more.
+@use "city-of-mist/fonts/averia-serif-libre.scss";
+@use "city-of-mist/fonts/bebas-neue.scss";
+@use "city-of-mist/fonts/courier-prime.scss";
+@use "city-of-mist/fonts/fira-sans-extra-condensed.scss";
+@use "city-of-mist/fonts/pt-serif.scss";
+@use "city-of-mist/fonts/roboto.scss";
+@use "legend-in-the-mist/fonts/caveat-brush.scss";
+@use "legend-in-the-mist/fonts/caveat.scss";
+@use "legend-in-the-mist/fonts/im-fell-english.scss";
+@use "legend-in-the-mist/fonts/im-fell-great-primer.scss";
+@use "legend-in-the-mist/fonts/labrada.scss";

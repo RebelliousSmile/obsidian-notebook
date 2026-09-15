@@ -1,0 +1,33 @@
+{
+  "manifestVersion": 1,
+  "kits": [
+    {
+      "id": "mist-engine",
+      "label": "Mist Engine",
+      "description": "Install City of Mist, Legend in the Mist and :Otherscape from one schema repository.",
+      "initialMode": "city-of-mist",
+      "sources": [
+        {
+          "repository": "RebelliousSmile/schema-in-the-mist",
+          "reference": { "kind": "branch", "value": "main" }
+        }
+      ]
+    },
+    {
+      "id": "adrenaline-and-pbta",
+      "label": "Adrenaline + PbtA (test)",
+      "description": "Install two schema repositories together to try Adrenaline and PbtA games.",
+      "initialMode": "adrenaline",
+      "sources": [
+        {
+          "repository": "RebelliousSmile/schema-adrenaline",
+          "reference": { "kind": "branch", "value": "main" }
+        },
+        {
+          "repository": "RebelliousSmile/schema-pbta",
+          "reference": { "kind": "branch", "value": "main" }
+        }
+      ]
+    }
+  ]
+}

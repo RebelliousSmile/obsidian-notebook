@@ -1,0 +1,10 @@
+{
+	"id": "obsidian-handbook",
+	"name": "Handbook",
+	"version": "2.8.6",
+	"minAppVersion": "1.12.7",
+	"description": "Game-specific themes and tools for tabletop roleplaying vaults.",
+	"author": "François-Xavier Guillois",
+	"authorUrl": "https://github.com/RebelliousSmile/obsidian-handbook",
+	"isDesktopOnly": false
+}

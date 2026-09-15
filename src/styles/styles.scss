@@ -1,0 +1,39 @@
+// Where a value belongs
+//
+// Since the packs own the rendering, a colour has two homes and only one of
+// them is right for any given value.
+//
+// It belongs to the pack (built-in `src/games/<game>.ts`, or an external
+// `pack.json`) when it is part of the game's scheme — the paper, the ink, the
+// accent, the palette and asset roles — because that is what
+// changes between two games and between two polarities, and what a reader may
+// override in `overrides.json`.
+//
+// It belongs here when it is none of those: a tint keyed by a vocabulary
+// Obsidian or a canvas snippet owns and a pack cannot enumerate, a texture
+// tuned against the ground behind it, or a value inside a document the pack's
+// custom properties do not reach.
+//
+// One line runs between them, and it is worth naming. A value that dresses the
+// page — the paper, the links, a highlighter mark on a word, a table, a
+// checkbox — is the pack's, because every note wears it whatever is written on
+// it. A value that belongs to the anatomy of one block — the accent of a
+// Mythos card, the tint of a danger panel — stays here, because a pack already
+// has a way into a block through `shapes`, and two doors into the same block
+// would be two truths about it.
+//
+// Every partial that keeps a colour of its own says at the top which of those
+// it is. A silent one is a debt no one can see.
+
+@use "fonts";
+@use "city-of-mist/index.scss" as cityOfMist;
+@use "legend-in-the-mist/index.scss" as legendInTheMist;
+@use "otherscape/index.scss" as otherscape;
+@use "adrenaline/index.scss" as adrenaline;
+@use "pbta/index.scss" as pbta;
+@use "neutralize";
+@use "fallbacks";
+@use "lantern.scss";
+@use "settings.scss";
+@use "note-background";
+@use "print";

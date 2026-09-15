@@ -1,0 +1,207 @@
+// What a block looks like when its illustration is not in the vault.
+//
+// The plugin no longer carries its art inside the stylesheet: a game declares
+// its files, the plugin looks for them in the vault, and poses
+// `brumes-missing--<role>` on the body for every role it has no file behind —
+// one it declared and could not find, or one it never declared at all. Both
+// are the same thing to a template: a variable with no value.
+//
+// The rule of the fallback: keep the structure, drop the ornament. A card
+// without its frame is still a card, on a flat ground pulled from the pack's
+// own tokens; a badge without its icon is nothing at all and goes away
+// rather than leaving an empty box behind.
+//
+// Each rule is scoped like the rule it degrades. A note ornament belongs to a
+// game, so its fallback carries that game's class; a canvas node is styled
+// outside any game, so its fallback is too.
+
+// ---------------------------------------------------------------------------
+// Legend in the Mist: theme cards, tag marks, checkboxes, rules.
+// ---------------------------------------------------------------------------
+
+@mixin flat-card {
+	background-image: none;
+	background-color: var(--background-primary-alt);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m);
+	// The frame carried the card's shape; without it the padding of the
+	// mixin alone leaves the text against the border.
+	padding: 1.4em 1.3em;
+}
+
+@mixin typed-mark($glyph) {
+	background-image: none;
+	content: $glyph;
+	color: var(--checkbox-marker-color, var(--text-on-accent));
+	font-weight: bold;
+	line-height: var(--checkbox-size);
+	text-align: center;
+}
+
+body.brumes--legend-in-the-mist {
+	&.brumes-missing--theme-card .brumes-story-theme {
+		@include flat-card;
+	}
+
+	&.brumes-missing--theme-card-origin .brumes-story-theme--might-origin {
+		@include flat-card;
+	}
+
+	&.brumes-missing--theme-card-adventure
+		.brumes-story-theme--might-adventure {
+		@include flat-card;
+	}
+
+	&.brumes-missing--theme-card-greatness
+		.brumes-story-theme--might-greatness {
+		@include flat-card;
+	}
+
+	// The might badge sits in the card's top corner. With no icon it is an
+	// empty square, so it stops existing and the category line carries the
+	// level alone.
+	&.brumes-missing--card-might-origin
+		.brumes-story-theme--might-origin::after,
+	&.brumes-missing--card-might-adventure
+		.brumes-story-theme--might-adventure::after,
+	&.brumes-missing--card-might-greatness
+		.brumes-story-theme--might-greatness::after {
+		content: none;
+	}
+
+	// The weakness cross becomes a typed one rather than a blank gap, because
+	// the tag's padding is reserved for it either way.
+	&.brumes-missing--weakness-mark .brumes-weakness::before {
+		background-image: none;
+		content: "\00d7";
+		width: 1.2ch;
+		font-weight: bold;
+		line-height: 1;
+		text-align: center;
+	}
+
+	// A limit number is text over a drawn plate. The number stays; the plate
+	// becomes a filled chip of the tag's own colour.
+	&.brumes-missing--limit-mark .brumes-limit::after {
+		background-image: none;
+		background-color: var(--brumes-limit-color);
+		border-radius: var(--radius-s);
+	}
+
+	&.brumes-missing--limit-mark-empty
+		.brumes-limit[data-limit-value=""]::after {
+		background-image: none;
+		background-color: var(--background-modifier-border);
+		border-radius: var(--radius-s);
+	}
+
+	// A checkbox state nobody can read is a bug, not a missing decoration.
+	&.brumes-missing--checkbox-minus {
+		input[data-task="-"]:checked,
+		li[data-task="-"] > input:checked,
+		li[data-task="-"] > p > input:checked {
+			--checkbox-color: var(--color-red);
+		}
+
+		input[data-task="-"]:checked:after,
+		li[data-task="-"] > input:checked:after,
+		li[data-task="-"] > p > input:checked:after {
+			@include typed-mark("\2212");
+		}
+	}
+
+	&.brumes-missing--checkbox-plus {
+		input[data-task="+"]:checked,
+		li[data-task="+"] > input:checked,
+		li[data-task="+"] > p > input:checked {
+			--checkbox-color: var(--color-green);
+		}
+
+		input[data-task="+"]:checked:after,
+		li[data-task="+"] > input:checked:after,
+		li[data-task="+"] > p > input:checked:after {
+			@include typed-mark("\002b");
+		}
+	}
+
+	&.brumes-missing--checkbox-tilde {
+		input[data-task="~"]:checked,
+		li[data-task="~"] > input:checked,
+		li[data-task="~"] > p > input:checked {
+			--checkbox-color: var(--color-yellow);
+		}
+
+		input[data-task="~"]:checked:after,
+		li[data-task="~"] > input:checked:after,
+		li[data-task="~"] > p > input:checked:after {
+			@include typed-mark("\007e");
+		}
+	}
+
+	// Rules and separators are pure ornament, so a plain line stands in.
+	&.brumes-missing--separator .view-content .markdown-rendered hr,
+	&.brumes-missing--separator .view-content hr {
+		background-image: none;
+		height: 0;
+		border-top: 1px solid var(--background-modifier-border);
+	}
+
+	&.brumes-missing--inline-title-rule
+		.inline-title:not(.mk-inline-title)::after {
+		background-image: none;
+		height: 1px;
+		background-color: var(--background-modifier-border);
+	}
+
+	&.brumes-missing--heading-2-rule {
+		.HyperMD-header-2::after,
+		h2::after,
+		.HyperMD-list-line .cm-header-2::after {
+			background-image: none;
+			height: 1px;
+			margin-bottom: 0.35em;
+			background-color: var(--background-modifier-border);
+		}
+	}
+}
+
+// ---------------------------------------------------------------------------
+// City of Mist: the torn strip above a move callout. Nothing replaces it.
+// ---------------------------------------------------------------------------
+
+body.brumes--city-of-mist.brumes-missing--callout-edge
+	.callout[data-brumes-callout-style="move"]::before {
+	background-image: none;
+	content: none;
+}
+
+// ---------------------------------------------------------------------------
+// Canvas nodes: styled outside any game, so degraded outside any game too.
+// The art is a plate above the text; the colour is not.
+// ---------------------------------------------------------------------------
+
+// A mountain node keeps its background colour, which comes from the partial
+// and not from a file; only the icon goes.
+body.brumes-missing--mountain-might-greatness
+	.canvas-node[data-mountain-card="greatness"],
+body.brumes-missing--mountain-might-adventure
+	.canvas-node[data-mountain-card="adventure"],
+body.brumes-missing--mountain-might-origin
+	.canvas-node[data-mountain-card="origin"] {
+	--might-icon: none;
+}
+
+// An iceberg node's plate is a framed picture; with nothing in the frame it
+// collapses instead of reserving the height of an absent image.
+body.brumes-missing--iceberg-location
+	.canvas-node[data-iceberg-card="location"]
+	.canvas-node-content::before,
+body.brumes-missing--iceberg-character
+	.canvas-node[data-iceberg-card="character"]
+	.canvas-node-content::before,
+body.brumes-missing--iceberg-group
+	.canvas-node[data-iceberg-card="group"]
+	.canvas-node-content::before {
+	content: none;
+	display: none;
+}

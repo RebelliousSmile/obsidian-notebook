@@ -1,0 +1,10 @@
+// Chromium/print vocabulary, not a pack token: keeps backgrounds and
+// background colours from being dropped by Chromium's default print
+// pipeline, whichever pack is active.
+@media print {
+	html,
+	body {
+		print-color-adjust: exact;
+		-webkit-print-color-adjust: exact;
+	}
+}
