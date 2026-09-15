@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 ---
 
 # Instruction: Purge TTRPG résiduelle + réparation des imports
@@ -159,6 +159,15 @@ flowchart TD
 2. Lancer `pnpm build` (`tsc -noEmit -skipLibCheck && esbuild`, ce dernier compilant aussi `src/styles/styles.scss` via `sassPlugin`) : doit passer sans erreur, y compris la résolution des `@use` Sass corrigée à la tâche 5.
 3. Grep le dossier `src/` pour `lantern`, `city-of-mist`, `legend-in-the-mist`, `otherscape`, `pbta`, `adrenaline` (insensible à la casse) : seul `src/features/callouts/nativeCallouts.ts` doit encore apparaître (catalogue de callouts City of Mist/Legend in the Mist, réécrit en phase 3) — aucune autre occurrence, dans aucun autre fichier.
 
+### `12)` Réparer `tools/assertStyleScope.harness.mts` (gap découvert à l'exécution)
+
+> Non couvert par les tâches 1 à 11 : ce harnais lit `src/styles/adrenaline/_page.scss`/`_callouts.scss`, deux fichiers qui n'ont jamais existé dans cette copie (déjà cassé avant la purge, indépendamment de ce plan), et exerce un block `theme-card` via `loadBrumesBlocks` — un block retiré à la tâche 3 (`BRUMES_BLOCKS` vidé). Sans correction, `pnpm assert:style-scope` échoue.
+
+1. Retirer le bloc qui lit `src/styles/adrenaline/_page.scss`/`_callouts.scss` et ses assertions (fichiers absents du disque, contenu scoped Adrenaline sans rapport avec le mécanisme générique de scoping CSS déjà couvert par les assertions `buildGameStyle`/`GameStyleWriter` plus haut dans le fichier).
+2. Retirer le bloc qui charge `theme-card` via `loadBrumesBlocks`/`BrumesPlugin` (classe `El`/`documentStub`/`processors`/objet `plugin` inclus) : plus aucun block n'existe à ce stade (tâche 3) pour l'exercer ; les assertions `brumes-block-scope`/classe de mode qu'il vérifiait restent couvertes par l'assertion regex `\.brumes-block-scope\.brumes--legend-in-the-mist` sur le CSS généré, conservée plus haut. Retirer les imports devenus inutilisés (`loadBrumesBlocks`, `type BrumesPlugin`, `DEFAULT_SETTINGS`).
+3. Remplacer les identifiants de mode d'exemple `legend-in-the-mist`/`city-of-mist`/`otherscape` (constante `MODE_CLASS`, arguments de `buildGameStyle`, chaîne CSS littérale du test `GameStyleWriter`, clé de `gameVariants` du test `normalizeSettings`) par des identifiants génériques neutres (ex. `test-pack`/`other-pack`) : ce ne sont que des exemples arbitraires pour exercer un mécanisme générique de scoping par mode, aucune sémantique de jeu n'y est testée.
+4. Les renommages `Game*`→`Pack*`/`brumes-*`→`notebook-*` de ce fichier restent hors périmètre ici : couverts par la boucle grep-jusqu'à-zéro de la phase 2 (task 7).
+
 ## Test acceptance criteria
 
 | Task | Acceptance criteria                                                                 |
@@ -174,3 +183,4 @@ flowchart TD
 | 9    | `package.json` ne référence plus aucun script pointant vers un fichier `tools/` absent ; `tools/assert-corpus.mjs`, `tools/assertCorpus.harness.mts`, `tools/dump-dom.mjs`, `tools/dumpDom.harness.mts`, `tools/assert-override.mjs`, `tools/overrideRoundTrip.harness.mts` et le dossier `corpus/` n'existent plus sur le disque |
 | 10   | `starter-kits/catalog.json` est `{"manifestVersion":1,"kits":[]}`                     |
 | 11   | `pnpm install && pnpm build` terminent sans erreur (y compris la compilation Sass)     |
+| 12   | `pnpm assert:style-scope` termine avec un code de sortie 0                             |

@@ -5,13 +5,9 @@
 	"main": "dist/main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs --watch",
-		"dev:schema-pbta": "node tools/dev-schema-source.mjs --source ../schema-pbta",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"check": "node tools/check.mjs",
 		"lint": "eslint .",
-		"assert:corpus": "node tools/assert-corpus.mjs",
-		"dump:dom": "node tools/dump-dom.mjs",
-		"assert:override": "node tools/assert-override.mjs",
 		"assert:game-storage": "node tools/assert-game-storage.mjs",
 		"assert:github-sources": "node tools/assert-github-sources.mjs",
 		"assert:custom-packs": "node tools/assert-custom-packs.mjs",
@@ -20,23 +16,12 @@
 		"assert:starter-kits": "node tools/assert-starter-kits.mjs",
 		"e2e:request-url": "bash tools/e2e/request-url-journey.sh",
 		"assert:game-variants": "node tools/assert-game-variants.mjs",
-		"assert:otherscape-primitives": "node tools/assert-otherscape-primitives.mjs",
-		"assert:otherscape-theme": "node tools/assert-otherscape-theme.mjs",
-		"assert:adrenaline-documents": "node tools/assert-adrenaline-documents.mjs",
-		"assert:adrenaline-contract": "node tools/assert-adrenaline-contract.mjs",
-		"assert:adrenaline-theme": "node tools/assert-adrenaline-theme.mjs",
-		"assert:adrenaline-zombiology-style": "node tools/assert-adrenaline-zombiology-style.mjs",
-		"assert:pbta-theme": "node tools/assert-pbta-theme.mjs",
-		"assert:pbta-contract": "node tools/assert-pbta-contract.mjs",
 		"assert:settings-ui": "node tools/assert-settings-ui.mjs",
 		"assert:reload-styles": "node tools/assert-reload-styles.mjs",
 		"assert:style-scope": "node tools/assert-style-scope.mjs",
-		"assert:tag-widget": "node tools/assert-tag-widget.mjs",
-		"assert:city-v1-theme": "node tools/assert-city-v1-theme.mjs",
 		"assert:callouts": "node tools/assert-callouts.mjs",
 		"assert:note-background": "node tools/assert-note-background.mjs",
-		"version": "node version-bump.mjs && git add manifest.json versions.json",
-		"assert:mist-contract": "node tools/assert-mist-contract.mjs"
+		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
 	"keywords": [
 		"city of mist",
@@ -51,11 +36,7 @@
 	"dependencies": {
 		"obsidian": "^1.12.3",
 		"postcss": "8.5.6",
-		"postcss-selector-parser": "7.1.0",
-		"schema-adrenaline": "https://github.com/RebelliousSmile/schema-adrenaline/releases/download/v1.0.0/schema-adrenaline-1.0.0.tgz",
-		"schema-in-the-mist": "https://github.com/RebelliousSmile/schema-in-the-mist/releases/download/v1.0.0/schema-in-the-mist-1.0.0.tgz",
-		"schema-pbta": "https://github.com/RebelliousSmile/schema-pbta/releases/download/v1.0.0/schema-pbta-1.0.0.tgz",
-		"smol-toml": "^1.8.0"
+		"postcss-selector-parser": "7.1.0"
 	},
 	"devDependencies": {
 		"@codemirror/state": "6.5.0",

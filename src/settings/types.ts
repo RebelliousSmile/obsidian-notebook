@@ -30,45 +30,7 @@ export type LogLevel = "none" | "error" | "warn" | "info" | "debug";
 export type ColourScheme = "obsidian" | "light" | "dark";
 
 export interface BrumesFeatureSettings {
-	/** Legacy persisted key; tag syntax is now always active. */
-	tagsSyntax: boolean;
 	workspaceTheme: boolean;
-	lanternIntegration: boolean;
-	storyThemeParser: boolean;
-	challengeParser: boolean;
-	journeyParser: boolean;
-	themeKitParser: boolean;
-	comThemeCardParser: boolean;
-	comDangerParser: boolean;
-	osThemeParser: boolean;
-	osThemeKitParser: boolean;
-	osChallengeParser: boolean;
-	osPowerSetParser: boolean;
-	osCharacterTropeParser: boolean;
-	osLoadoutItemParser: boolean;
-	/** Legacy persisted keys; Adrenaline blocks now follow the installed game. */
-	adrenalinePjParser: boolean;
-	adrenalinePnjParser: boolean;
-	adrenalineMonsterParser: boolean;
-	pbtaParser: boolean;
-}
-
-export interface CityOfMistCalloutAliases {
-	note: string[];
-	move: string[];
-	description: string[];
-	clue: string[];
-	redClue: string[];
-}
-
-export interface LegendInTheMistCalloutAliases {
-	note: string[];
-	readAloud: string[];
-}
-
-export interface BrumesCalloutAliasesSettings {
-	cityOfMist: CityOfMistCalloutAliases;
-	legendInTheMist: LegendInTheMistCalloutAliases;
 }
 
 export interface BrumesSettings {
@@ -76,7 +38,6 @@ export interface BrumesSettings {
 	gameVariants: Record<string, string>;
 	colourScheme: ColourScheme;
 	logLevel: LogLevel;
-	lanternUrl: string;
 	features: BrumesFeatureSettings;
 	callouts: CalloutDefinition[];
 	schemaSources: SchemaSource[];
@@ -87,27 +48,8 @@ export const DEFAULT_SETTINGS: BrumesSettings = {
 	gameVariants: {},
 	colourScheme: "obsidian",
 	logLevel: "error",
-	lanternUrl: "https://lantern.ravenloft.fr",
 	features: {
-		tagsSyntax: true,
 		workspaceTheme: true,
-		lanternIntegration: true,
-		storyThemeParser: true,
-		challengeParser: true,
-		journeyParser: true,
-		themeKitParser: true,
-		comThemeCardParser: true,
-		comDangerParser: true,
-		osThemeParser: true,
-		osThemeKitParser: true,
-		osChallengeParser: true,
-		osPowerSetParser: true,
-		osCharacterTropeParser: true,
-		osLoadoutItemParser: true,
-		adrenalinePjParser: true,
-		adrenalinePnjParser: true,
-		adrenalineMonsterParser: true,
-		pbtaParser: true,
 	},
 	callouts: NATIVE_CALLOUTS,
 	schemaSources: [],
@@ -141,11 +83,8 @@ const LOG_LEVELS: LogLevel[] = ["none", "error", "warn", "info", "debug"];
 const COLOUR_SCHEMES: ColourScheme[] = ["obsidian", "light", "dark"];
 
 export function normalizeMode(mode: unknown): BrumesMode {
-	// The colon was dropped from the identifier, not from the name.
-	const id = mode === ":otherscape" ? "otherscape" : mode;
-
-	if (findGamePack(id)) {
-		return id as BrumesMode;
+	if (findGamePack(mode)) {
+		return mode as BrumesMode;
 	}
 
 	if (typeof mode === "string" && mode.length > 0) {
@@ -217,17 +156,8 @@ function normalizeFeatures(
 	return normalized;
 }
 
-/**
- * The stored data may still be the pre-migration shape (`calloutAliases`,
- * no `callouts`): kept here only so `normalizeCallouts` can read it once,
- * not as a `BrumesSettings` field any more.
- */
-type LegacyCalloutAliasesData = {
-	calloutAliases?: Partial<BrumesCalloutAliasesSettings>;
-};
-
 export function normalizeSettings(
-	data: (Partial<BrumesSettings> & LegacyCalloutAliasesData) | null | undefined,
+	data: Partial<BrumesSettings> | null | undefined,
 ): BrumesSettings {
 	const source = data ?? {};
 	const features: Partial<BrumesFeatureSettings> = source.features ?? {};
@@ -237,12 +167,8 @@ export function normalizeSettings(
 		gameVariants: normalizeGameVariants(source.gameVariants),
 		colourScheme: normalizeColourScheme(source.colourScheme),
 		logLevel: normalizeLogLevel(source.logLevel),
-		lanternUrl:
-			typeof source.lanternUrl === "string"
-				? source.lanternUrl.trim() || DEFAULT_SETTINGS.lanternUrl
-				: DEFAULT_SETTINGS.lanternUrl,
 		features: normalizeFeatures(features),
-		callouts: normalizeCallouts(source.callouts, source.calloutAliases),
+		callouts: normalizeCallouts(source.callouts),
 		schemaSources: normalizeSchemaSources(source.schemaSources),
 	};
 }

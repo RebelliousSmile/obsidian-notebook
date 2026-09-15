@@ -1,4 +1,3 @@
-import type { BrumesCalloutAliasesSettings } from "../../settings/types";
 import { logScope } from "../../utils/logger";
 import { NATIVE_CALLOUTS } from "./nativeCallouts";
 import { sanitizeAliases } from "./sanitizeAlias";
@@ -13,50 +12,16 @@ import {
 const calloutsLog = logScope("Callouts");
 
 /**
- * Old shape id -> saved alias list, one entry per native callout. Kept
- * explicit rather than derived, since the old and new ids never shared a
- * naming pattern.
- */
-const OLD_ALIASES_BY_NATIVE_ID: Record<
-	string,
-	(old: Partial<BrumesCalloutAliasesSettings>) => string[] | undefined
-> = {
-	"city-of-mist-clue": (old) => old.cityOfMist?.clue,
-	"city-of-mist-red-clue": (old) => old.cityOfMist?.redClue,
-	"city-of-mist-move": (old) => old.cityOfMist?.move,
-	"city-of-mist-description": (old) => old.cityOfMist?.description,
-	"city-of-mist-note": (old) => old.cityOfMist?.note,
-	"legend-in-the-mist-note": (old) => old.legendInTheMist?.note,
-	"legend-in-the-mist-read-aloud": (old) => old.legendInTheMist?.readAloud,
-};
-
-export function migrateAliases(
-	old: Partial<BrumesCalloutAliasesSettings> | undefined,
-): CalloutDefinition[] {
-	const source = old ?? {};
-
-	return NATIVE_CALLOUTS.map((native) => {
-		const savedAliases = OLD_ALIASES_BY_NATIVE_ID[native.id]?.(source);
-
-		if (!savedAliases || savedAliases.length === 0) {
-			return { ...native, aliases: [...native.aliases] };
-		}
-
-		return { ...native, aliases: sanitizeAliases(savedAliases) };
-	});
-}
-
-/**
  * Entry point `normalizeSettings` calls: a `callouts` array already in the
- * new shape is validated field by field, a missing one falls back to
- * migrating the old `calloutAliases` shape.
+ * new shape is validated field by field, a missing one falls back to the
+ * native callouts.
  */
-export function normalizeCallouts(
-	callouts: unknown,
-	calloutAliases: Partial<BrumesCalloutAliasesSettings> | undefined,
-): CalloutDefinition[] {
+export function normalizeCallouts(callouts: unknown): CalloutDefinition[] {
 	if (!Array.isArray(callouts)) {
-		return migrateAliases(calloutAliases);
+		return NATIVE_CALLOUTS.map((native) => ({
+			...native,
+			aliases: [...native.aliases],
+		}));
 	}
 
 	const takenIds = new Set<string>();

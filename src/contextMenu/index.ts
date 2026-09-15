@@ -5,10 +5,6 @@ import {
 	hasBlockInsertions,
 } from "../features/blocks/registry";
 import {
-	contributeTagInsertion,
-	hasTagInsertion,
-} from "../features/tags/contextMenu";
-import {
 	contributeCalloutInsertions,
 	getAvailableCalloutInsertions,
 } from "../features/callouts/contextMenu";
@@ -19,7 +15,6 @@ export function registerBrumesContextMenu(plugin: BrumesPlugin): EventRef {
 		"editor-menu",
 		(menu: Menu, editor: Editor) => {
 			const hasAnyItems =
-				hasTagInsertion() ||
 				getAvailableCalloutInsertions(plugin.settings, plugin.settings.mode)
 					.length > 0 ||
 				hasBlockInsertions(plugin.settings);
@@ -31,16 +26,6 @@ export function registerBrumesContextMenu(plugin: BrumesPlugin): EventRef {
 			const submenu = getOrCreateBrumesSubmenu(menu);
 			let hasItems = false;
 
-			const tagItems = contributeTagInsertion(submenu, editor);
-			hasItems = tagItems > 0;
-
-			if (
-				getAvailableCalloutInsertions(plugin.settings, plugin.settings.mode)
-					.length > 0 &&
-				hasItems
-			) {
-				submenu.addSeparator();
-			}
 			const calloutItems = contributeCalloutInsertions(
 				submenu,
 				editor,

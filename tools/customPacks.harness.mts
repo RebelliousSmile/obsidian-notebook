@@ -3,12 +3,10 @@ import { readFileSync } from "node:fs";
 import { GAME_PACKS, initGameRegistry, resolveGamePack, resolveGameRegistration, gamePackClasses } from "../src/games/registry";
 import { loadCustomGamePacks } from "../src/games/customPacks";
 import { resolveGameAssets } from "../src/games/assets";
-import { GAME_PLUGIN_BLOCK_CAPABILITIES, PORTABLE_GAME_PLUGIN_SUPPORT } from "../src/games/capabilities";
-import { BRUMES_BLOCKS, isAvailableBlock } from "../src/features/blocks/registry";
-import { isBlockEnabled } from "../src/features/blocks/types";
-import { resolveThemeContents } from "../src/settings/themeContentsModal";
+import { GAME_PLUGIN_BLOCK_CAPABILITIES } from "../src/games/capabilities";
+import { BRUMES_BLOCKS } from "../src/features/blocks/registry";
 import { log } from "../src/utils/logger";
-import { DEFAULT_SETTINGS, normalizeMode, normalizeSettings } from "../src/settings/types";
+import { normalizeMode, normalizeSettings } from "../src/settings/types";
 
 const HOST_VERSION = (JSON.parse(readFileSync("package.json", "utf8")) as { version: string }).version;
 
@@ -111,56 +109,6 @@ async function run(): Promise<void> {
 		check("a missing packs folder yields no plugin", packs.length === 0);
 		check("a missing packs folder warns nothing", errors.length === 0);
 		check("the registry is untouched before init", GAME_PACKS.length === packsBefore);
-	}
-
-	/* Adrenaline follows the complete absent, installed, removed lifecycle. */
-	{
-		initGameRegistry([]);
-		const adrenalineBlocks = BRUMES_BLOCKS.filter((block) => block.mode === "adrenaline");
-		const savedData = {
-			mode: "adrenaline",
-			features: {
-				...DEFAULT_SETTINGS.features,
-				adrenalinePjParser: false,
-				adrenalinePnjParser: false,
-				adrenalineMonsterParser: false,
-			},
-		};
-		check("Adrenaline starts absent", !GAME_PACKS.some((pack) => pack.id === "adrenaline"));
-		check("an absent saved Adrenaline mode falls back to neutral", normalizeMode("adrenaline") === "none");
-		check(
-			"Adrenaline processors stay disabled while its mode is absent",
-			adrenalineBlocks.every((block) => !isBlockEnabled(block, normalizeSettings({ mode: "adrenaline" }))),
-		);
-		check("saved Adrenaline feature flags survive absence", !normalizeSettings(savedData).features.adrenalinePjParser && !normalizeSettings(savedData).features.adrenalinePnjParser && !normalizeSettings(savedData).features.adrenalineMonsterParser);
-
-		const { plugin } = fakePlugin({
-			"adrenaline/pack.json": gamePlugin("adrenaline", {
-				requires: [
-					"block:adrenaline-pj",
-					"block:adrenaline-pnj",
-					"block:adrenaline-monstre",
-					"style:adrenaline",
-				],
-			}),
-		});
-		initGameRegistry(await loadCustomGamePacks(plugin));
-		check("Adrenaline installs from its directory", resolveGamePack("adrenaline").id === "adrenaline");
-		check("the installed Adrenaline mode normalizes", normalizeMode("adrenaline") === "adrenaline");
-		check("a neutral mode selects the first installed game", normalizeMode("none") === "adrenaline");
-		check("the installed Adrenaline class is registered", gamePackClasses().includes("brumes--adrenaline"));
-		check(
-			"installed Adrenaline processors are always available",
-			adrenalineBlocks.every((block) => isBlockEnabled(block, normalizeSettings({ mode: "adrenaline" }))),
-		);
-		check(
-			"obsolete disabled flags cannot disable reinstalled Adrenaline blocks",
-			adrenalineBlocks.every((block) => isBlockEnabled(block, normalizeSettings(savedData))),
-		);
-
-		initGameRegistry([]);
-		check("removing Adrenaline removes its class", !gamePackClasses().includes("brumes--adrenaline"));
-		check("a removed saved Adrenaline mode falls back to neutral", normalizeMode("adrenaline") === "none");
 	}
 
 	/* Legacy flat files retain their tolerant, deterministic behavior. */
@@ -287,52 +235,27 @@ async function run(): Promise<void> {
 		}
 	}
 
-	/* A known capability cannot be borrowed by a differently named game. */
+	/* An unrecognized capability rejects the whole plugin, named per game. */
 	{
 		const errorsBefore = errors.length;
 		const { plugin } = fakePlugin({
-			"borrowed/pack.json": gamePlugin("borrowed", {
-				requires: ["block:adrenaline-pj", "style:adrenaline"],
+			"unrecognized/pack.json": gamePlugin("unrecognized", {
+				requires: ["block:not-installed", "style:not-installed"],
 			}),
 			"mixed/pack.json": gamePlugin("mixed", {
-				requires: ["style:adrenaline", "block:not-installed"],
+				requires: ["style:not-installed", "block:also-not-installed"],
 			}),
 		});
 		const installed = await loadCustomGamePacks(plugin);
-		check("foreign capabilities reject the whole plugin", installed.length === 0);
+		check("unrecognized capabilities reject the whole plugin", installed.length === 0);
 		check(
-			"the foreign capability diagnosis names the game",
-			errors.slice(errorsBefore).some((line) => line.includes('for "borrowed"') && line.includes("style:adrenaline")),
+			"the unknown capability diagnosis names the offending pack file and every capability",
+			errors.slice(errorsBefore).some((line) => line.includes("unrecognized/pack.json") && line.includes("block:not-installed") && line.includes("style:not-installed")),
 		);
 		check(
-			"unknown capabilities keep their own diagnosis",
-			errors.slice(errorsBefore).some((line) => line.includes("unknown Handbook capabilities") && line.includes("block:not-installed")),
+			"unknown capabilities keep their own diagnosis per game",
+			errors.slice(errorsBefore).some((line) => line.includes("unknown Handbook capabilities") && line.includes("block:also-not-installed")),
 		);
-	}
-
-	/* Portable PbtA primitives are activated by capability, never by game id. */
-	{
-		const id = "never-seen-by-handbook";
-		const requires = [
-			...PORTABLE_GAME_PLUGIN_SUPPORT.blocks,
-			...PORTABLE_GAME_PLUGIN_SUPPORT.styles,
-		];
-		const { plugin } = fakePlugin({
-			[`${id}/pack.json`]: gamePlugin(id, { requires }),
-		});
-		const installed = await loadCustomGamePacks(plugin);
-		initGameRegistry(installed);
-		const settings = normalizeSettings({ mode: id });
-		const registration = resolveGameRegistration(id);
-		const contents = resolveThemeContents(registration, settings.callouts);
-
-		check("an unknown game id can install the portable PbtA contract", installed.length === 1);
-		check("the unknown PbtA game remains the active mode", settings.mode === id);
-		check("the PbtA playbook is available from manifest capabilities", isAvailableBlock(BRUMES_BLOCKS.find((block) => block.id === "pbta-playbook")!, settings));
-		check("the PbtA move is available from manifest capabilities", isAvailableBlock(BRUMES_BLOCKS.find((block) => block.id === "pbta-move")!, settings));
-		check("the unknown PbtA game exposes one handout", contents.handouts.map((block) => block.id).join(",") === "pbta-playbook");
-		check("the unknown PbtA game exposes both code blocks", contents.blocks.map((block) => block.id).sort().join(",") === "pbta-move,pbta-playbook");
-		check("the unknown PbtA game exposes the four generic callouts", contents.callouts.filter((callout) => callout.capability === "style:pbta").length === 4);
 	}
 
 	/* A plugin asset root is relative and confined to its installation. */

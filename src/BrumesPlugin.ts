@@ -1,5 +1,4 @@
-import { addIcon, EventRef, MarkdownView, Notice, Plugin, TFile } from "obsidian";
-import { loadTagFeature } from "./features/tags";
+import { EventRef, MarkdownView, Plugin, TFile } from "obsidian";
 import { BrumesSettingTab } from "./settings";
 import { BrumesSettings, normalizeSettings } from "./settings/types";
 import { log } from "./utils/logger";
@@ -51,14 +50,7 @@ import {
 	setShapeOverrides,
 } from "./features/blocks/shape";
 import { loadBrumesBlocks } from "./features/blocks/registry";
-import { loadTomlExportCommands } from "./features/blocks/tomlExports";
 import { registerBrumesContextMenu } from "./contextMenu";
-import {
-	LANTERN_ICON,
-	LANTERN_VIEW_TYPE,
-	LanternView,
-} from "./views/LanternView";
-import { LANTERN_LOGO_SVG } from "./views/lanternLogo";
 import { loadCalloutAliasFeature } from "./features/callouts/aliasSupport";
 import { buildCalloutStyleCss } from "./features/callouts/styleWriter";
 import { clearCalloutCommands, syncCalloutCommands } from "./features/callouts/commands";
@@ -76,7 +68,6 @@ interface ApplySettingsOptions {
 export default class BrumesPlugin extends Plugin {
 	settings!: BrumesSettings;
 	private contextMenuEventRef: EventRef | null = null;
-	private lanternRibbonEl: HTMLElement | null = null;
 	private syncCalloutAliases: (() => void) | null = null;
 	private readonly gameStyle = new GameStyleWriter();
 	private overrides: GameOverride = EMPTY_OVERRIDE;
@@ -90,19 +81,11 @@ export default class BrumesPlugin extends Plugin {
 		await this.loadSettings();
 
 		log.setLevel(this.settings.logLevel);
-		addIcon(LANTERN_ICON, LANTERN_LOGO_SVG);
 		log.info("Handbook plugin loaded");
-
-		this.registerView(
-			LANTERN_VIEW_TYPE,
-			(leaf) => new LanternView(leaf, this),
-		);
 
 		this.addSettingTab(new BrumesSettingTab(this.app, this));
 
-		loadTagFeature(this);
 		loadBrumesBlocks(this);
-		loadTomlExportCommands(this);
 		this.syncCalloutAliases = loadCalloutAliasFeature(this);
 
 		this.addCommand({
@@ -160,9 +143,6 @@ export default class BrumesPlugin extends Plugin {
 			this.contextMenuEventRef = null;
 		}
 
-		this.lanternRibbonEl?.remove();
-		this.lanternRibbonEl = null;
-
 		for (const doc of this.collectDocuments()) {
 			clearBrumesModeClasses(doc);
 		}
@@ -175,24 +155,6 @@ export default class BrumesPlugin extends Plugin {
 		clearCalloutCommands(this);
 
 		log.info("Handbook plugin unloaded");
-	}
-
-	async activateLanternView() {
-		if (!this.settings.features.lanternIntegration) {
-			new Notice(
-				// eslint-disable-next-line obsidianmd/ui/sentence-case
-				"Enable Lantern in the Mist integration in Handbook settings first.",
-			);
-			return;
-		}
-
-		const leaf = this.app.workspace.getLeaf(true);
-
-		await leaf.setViewState({
-			type: LANTERN_VIEW_TYPE,
-			active: true,
-		});
-		void this.app.workspace.revealLeaf(leaf);
 	}
 
 	async saveSettings(options: ApplySettingsOptions = {}) {
@@ -259,7 +221,6 @@ export default class BrumesPlugin extends Plugin {
 	private applySettings(options: ApplySettingsOptions = {}) {
 		log.setLevel(this.settings.logLevel);
 		this.applyGameStyle();
-		this.refreshLanternIntegration();
 		this.refreshContextMenu();
 		this.syncCalloutAliases?.();
 		syncCalloutCommands(this, this.settings.callouts);
@@ -440,26 +401,6 @@ export default class BrumesPlugin extends Plugin {
 		}
 
 		this.contextMenuEventRef = registerBrumesContextMenu(this);
-	}
-
-	private refreshLanternIntegration() {
-		if (this.settings.features.lanternIntegration) {
-			if (!this.lanternRibbonEl) {
-				this.lanternRibbonEl = this.addRibbonIcon(
-					LANTERN_ICON,
-					// eslint-disable-next-line obsidianmd/ui/sentence-case
-					"Lantern in the Mist",
-					() => {
-						void this.activateLanternView();
-					},
-				);
-			}
-			return;
-		}
-
-		this.lanternRibbonEl?.remove();
-		this.lanternRibbonEl = null;
-		this.app.workspace.detachLeavesOfType(LANTERN_VIEW_TYPE);
 	}
 
 	private refreshMarkdownViews() {

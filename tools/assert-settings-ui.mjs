@@ -6,8 +6,6 @@ const themeContentsModal = readFileSync("src/settings/themeContentsModal.ts", "u
 const plugin = readFileSync("src/BrumesPlugin.ts", "utf8");
 const richDescriptions = [
 	"createOverrideDescription",
-	"createIcebergDescription",
-	"createMountainDescription",
 ];
 
 const failures = [];
@@ -50,12 +48,6 @@ if (!source.includes('variants.length < 2')) {
 
 if (!source.includes('.setName("Univers")')) {
 	failures.push("The game variant selector has no French-first visible label.");
-}
-
-for (const game of ["city-of-mist", "legend-in-the-mist", "otherscape"]) {
-	if (!source.includes(`this.plugin.settings.mode === "${game}" && findGamePack("${game}")`)) {
-		failures.push(`The ${game} settings section remains visible while another game is active.`);
-	}
 }
 
 if (!/if \(polarities\.length < 2\) \{\s*return;\s*\}/m.test(source)) {

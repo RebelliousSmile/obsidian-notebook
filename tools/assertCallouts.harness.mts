@@ -31,34 +31,6 @@ log.setLevel("warn");
 	assert.equal(pbta.every((entry) => isCalloutAvailable(entry, "unknown-game", ["style:pbta"])), true);
 }
 
-// Old shape with custom aliases on move and redClue migrates exactly onto
-// the matching native entries, without touching the others.
-{
-	const settings = normalizeSettings({
-		calloutAliases: {
-			cityOfMist: {
-				note: ["note", "aside"],
-				move: ["move", "action"],
-				description: ["description", "read-aloud"],
-				clue: ["clue"],
-				redClue: ["danger", "red-clue"],
-			},
-			legendInTheMist: {
-				note: ["note"],
-				readAloud: ["read-aloud"],
-			},
-		},
-	});
-
-	const move = settings.callouts.find((c) => c.id === "city-of-mist-move");
-	const redClue = settings.callouts.find((c) => c.id === "city-of-mist-red-clue");
-	const clue = settings.callouts.find((c) => c.id === "city-of-mist-clue");
-
-	assert.deepEqual(move?.aliases, ["move", "action"]);
-	assert.deepEqual(redClue?.aliases, ["danger", "red-clue"]);
-	assert.deepEqual(clue?.aliases, ["clue"]);
-}
-
 // An unsafe scope is discarded and warned once; a safe plugin id is allowed
 // even when that plugin is absent, so uninstalling it does not erase data.
 {

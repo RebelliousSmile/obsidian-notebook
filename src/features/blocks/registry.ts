@@ -5,43 +5,12 @@ import { BrumesSettings } from "../../settings/types";
 import { logScope } from "../../utils/logger";
 import { renderRawBlock } from "./fallback";
 import { BrumesBlock, blockIds, isBlockEnabled } from "./types";
-import { challengeBlock } from "../challenges/block";
-import { comDangerBlock } from "../comDangers/block";
-import { comThemeCardBlock } from "../comThemeCards/block";
-import { journeyBlock } from "../journeys/block";
-import { themeCardBlock } from "../themeCards/block";
-import { themeKitBlock } from "../themeKits/block";
 import { BLOCK_SCOPE_CLASS } from "../modes/domModeClass";
-import { osThemeBlock, osThemeKitBlock } from "../osThemes/block";
-import { osChallengeBlock, osPowerSetBlock } from "../osChallenges/block";
-import { osCharacterTropeBlock, osLoadoutItemBlock } from "../osCharacterCreation/block";
-import { adrenalinePjBlock } from "../adrenalinePj/block";
-import { adrenalinePnjBlock } from "../adrenalinePnj/block";
-import { adrenalineMonsterBlock } from "../adrenalineMonstre/block";
-import { pbtaMoveBlock, pbtaPlaybookBlock } from "../pbta/block";
 
 const log = logScope("Blocks");
 
 /** Every fenced block Brumes knows. Adding a format means adding a line here. */
-export const BRUMES_BLOCKS: BrumesBlock<unknown>[] = [
-	themeCardBlock,
-	challengeBlock,
-	journeyBlock,
-	themeKitBlock,
-	comThemeCardBlock,
-	comDangerBlock,
-	osThemeBlock,
-	osThemeKitBlock,
-	osChallengeBlock,
-	osPowerSetBlock,
-	osCharacterTropeBlock,
-	osLoadoutItemBlock,
-	adrenalinePjBlock,
-	adrenalinePnjBlock,
-	adrenalineMonsterBlock,
-	pbtaPlaybookBlock,
-	pbtaMoveBlock,
-];
+export const BRUMES_BLOCKS: BrumesBlock<unknown>[] = [];
 
 function requiredCapabilities(settings: BrumesSettings): readonly string[] {
 	return findGameRegistration(settings.mode)?.installation?.requires ?? [];

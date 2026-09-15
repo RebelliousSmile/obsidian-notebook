@@ -1,6 +1,6 @@
 ---
 objective: "Le plugin Notebook (fork de Handbook) build, lint et passe ses tests sans code TTRPG, entièrement renommé Brumes→Notebook/Game→Pack, avec deux packs de style natifs (gestion-projet, client-guide) fonctionnels dès l'installation."
-status: pending
+status: in-progress
 ---
 
 # Plan: Fork Notebook (depuis Handbook)

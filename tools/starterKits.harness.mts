@@ -1,8 +1,6 @@
 import { installStarterKitSources, readStarterKitCatalog, STARTER_KITS } from "../src/games/starterKits";
 
-if (STARTER_KITS.length !== 2) throw new Error("shipped catalogue should expose exactly two starter kits");
-if (STARTER_KITS[0]?.sources[0]?.repository !== "RebelliousSmile/schema-in-the-mist") throw new Error("Mist Engine starter kit source is incorrect");
-if (STARTER_KITS[1]?.sources.map((source) => source.repository).join(",") !== "RebelliousSmile/schema-adrenaline,RebelliousSmile/schema-pbta") throw new Error("shipped multi-source starter kit is incorrect");
+if (STARTER_KITS.length !== 0) throw new Error("shipped catalogue should expose no starter kits");
 
 const catalogue = readStarterKitCatalog({
 	manifestVersion: 1,

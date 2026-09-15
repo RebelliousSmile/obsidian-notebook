@@ -26,14 +26,8 @@
 // it is. A silent one is a debt no one can see.
 
 @use "fonts";
-@use "city-of-mist/index.scss" as cityOfMist;
-@use "legend-in-the-mist/index.scss" as legendInTheMist;
-@use "otherscape/index.scss" as otherscape;
-@use "adrenaline/index.scss" as adrenaline;
-@use "pbta/index.scss" as pbta;
 @use "neutralize";
 @use "fallbacks";
-@use "lantern.scss";
 @use "settings.scss";
 @use "note-background";
 @use "print";
