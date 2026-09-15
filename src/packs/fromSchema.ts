@@ -2,10 +2,10 @@
  * Reading a pack pack written as a document.
  *
  * The shape is the one published beside the content schemas, as
- * `appearance/pack-pack.schema.json` in schema-in-the-mist. The plugin depends
- * on no remote repository to read it: the contract is honoured by the shape of
- * the data, never by a fetch or an import, so a pack loads with the network
- * down and with the schema repository unreachable.
+ * `appearance/pack-pack.schema.json` in the pack's schema repository. The
+ * plugin depends on no remote repository to read it: the contract is honoured
+ * by the shape of the data, never by a fetch or an import, so a pack loads
+ * with the network down and with the schema repository unreachable.
  *
  * Nothing here validates in the strict sense. It follows the rule the blocks
  * already follow: a field that arrives wrong loses itself, is reported once,

@@ -7,10 +7,10 @@
  * custom property cannot express.
  *
  * These types are the published shape, read the way TypeScript reads it. The
- * contract lives beside the content schemas, in schema-in-the-mist, as
- * `appearance/pack-pack.schema.json`; `fromSchema.ts` turns a document of that
- * shape into the types below. Nothing at runtime reaches for that repository —
- * the schema describes the format, it does not serve it.
+ * contract lives beside the content schemas, in the pack's schema repository,
+ * as `appearance/pack-pack.schema.json`; `fromSchema.ts` turns a document of
+ * that shape into the types below. Nothing at runtime reaches for that
+ * repository — the schema describes the format, it does not serve it.
  *
  * The format is frozen. A field is never renamed or removed without a reading
  * path for the old form, because a pack lives in a user's vault as much as in
