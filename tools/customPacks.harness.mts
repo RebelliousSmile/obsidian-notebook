@@ -288,10 +288,14 @@ async function run(): Promise<void> {
 	/* The explicit catalogue must match the registered block ids. */
 	{
 		const declared = [...PACK_PLUGIN_BLOCK_CAPABILITIES].sort();
-		const registered = NOTEBOOK_BLOCKS.map((block) => `block:${block.id}`).sort();
+		const registered = NOTEBOOK_BLOCKS
+			.filter((block) => block.capability !== undefined)
+			.map((block) => block.capability as string)
+			.sort();
 		check("block capabilities match NOTEBOOK_BLOCKS", JSON.stringify(declared) === JSON.stringify(registered));
 		for (const block of NOTEBOOK_BLOCKS) {
-			const packId = block.capability ? "unknown-pbta-pack" : block.mode!;
+			if (!block.capability) continue;
+			const packId = "unknown-pbta-pack";
 			const result = packPlugin(packId, { requires: [`block:${block.id}`] });
 			const parsed = JSON.parse(result) as unknown;
 			const manifest = (await import("../src/packs/pluginManifest")).readPackPluginManifest(parsed, HOST_VERSION);

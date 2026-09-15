@@ -1,119 +1,50 @@
 import { CalloutDefinition } from "./types";
 
-const PBTA_CALLOUTS: CalloutDefinition[] = [
-	{
-		id: "pbta-rule", name: "PbtA rule", aliases: ["pbta-rule"], scope: "all",
-		template: "title-body", icon: "book-open-check", font: "header",
-		color: { kind: "theme" }, native: true, styleKey: "pbta-rule", capability: "style:pbta",
-	},
-	{
-		id: "pbta-trigger", name: "PbtA trigger", aliases: ["pbta-trigger"], scope: "all",
-		template: "body-only", icon: "zap", font: "text",
-		color: { kind: "theme" }, native: true, styleKey: "pbta-trigger", capability: "style:pbta",
-	},
-	{
-		id: "pbta-choice", name: "PbtA choice", aliases: ["pbta-choice"], scope: "all",
-		template: "title-body", icon: "list-checks", font: "text",
-		color: { kind: "theme" }, native: true, styleKey: "pbta-choice", capability: "style:pbta",
-	},
-	{
-		id: "pbta-result", name: "PbtA result", aliases: ["pbta-result"], scope: "all",
-		template: "title-body", icon: "dice-6", font: "text",
-		color: { kind: "theme" }, native: true, styleKey: "pbta-result", capability: "style:pbta",
-	},
-];
-
 /**
- * The 7 historical styles, verrouillées : styleKey/scope/aliases par défaut
- * repris tels quels de `aliasSupport.ts` et des anciennes constantes
- * `DEFAULT_CITY_OF_MIST_CALLOUT_ALIASES`/`DEFAULT_LEGEND_IN_THE_MIST_CALLOUT_ALIASES`.
- * `color`/`font`/`template` sont renseignés pour la cohérence du type mais
- * ignorés par le futur écrivain de style : le rendu reste dans `_callouts.scss`.
+ * Les 8 callouts natifs de gestion-projet et client-guide sont `native:
+ * false` bien qu'ils soient du catalogue : c'est ce champ qui déclenche le
+ * CSS auto-généré de `styleWriter.ts` (`native: true` suppose un partial
+ * SCSS statique qui n'existe pas ici).
  */
 export const NATIVE_CALLOUTS: CalloutDefinition[] = [
 	{
-		id: "city-of-mist-clue",
-		name: "Indice",
-		aliases: ["clue"],
-		scope: "city-of-mist",
-		template: "body-only",
-		icon: "search",
-		font: "text",
-		color: { kind: "theme" },
-		native: true,
-		styleKey: "clue",
+		id: "note", name: "Note", aliases: ["note"], scope: "gestion-projet",
+		template: "title-body", icon: "sticky-note", font: "header",
+		color: { kind: "fixed", hex: "#4c6ef5" }, native: false, styleKey: "note",
 	},
 	{
-		id: "city-of-mist-red-clue",
-		name: "Indice rouge",
-		aliases: ["red-clue"],
-		scope: "city-of-mist",
-		template: "body-only",
-		icon: "badge-alert",
-		font: "text",
-		color: { kind: "theme" },
-		native: true,
-		styleKey: "red-clue",
+		id: "warning", name: "Attention", aliases: ["warning"], scope: "gestion-projet",
+		template: "title-body", icon: "alert-triangle", font: "header",
+		color: { kind: "fixed", hex: "#d9822b" }, native: false, styleKey: "warning",
 	},
 	{
-		id: "city-of-mist-move",
-		name: "Mouvement",
-		aliases: ["move"],
-		scope: "city-of-mist",
-		template: "title-body",
-		icon: "swords",
-		font: "header",
-		color: { kind: "theme" },
-		native: true,
-		styleKey: "move",
+		id: "tip", name: "Astuce", aliases: ["tip"], scope: "gestion-projet",
+		template: "title-body", icon: "lightbulb", font: "header",
+		color: { kind: "fixed", hex: "#3f9d6b" }, native: false, styleKey: "tip",
 	},
 	{
-		id: "city-of-mist-description",
-		name: "Description",
-		aliases: ["description", "read-aloud"],
-		scope: "city-of-mist",
-		template: "body-only",
-		icon: "scroll-text",
-		font: "text",
-		color: { kind: "theme" },
-		native: true,
-		styleKey: "description",
+		id: "question", name: "Question", aliases: ["question"], scope: "gestion-projet",
+		template: "title-body", icon: "help-circle", font: "header",
+		color: { kind: "fixed", hex: "#8b6fc9" }, native: false, styleKey: "question",
 	},
 	{
-		id: "city-of-mist-note",
-		name: "Note",
-		aliases: ["note", "aside"],
-		scope: "city-of-mist",
-		template: "title-body",
-		icon: "sticky-note",
-		font: "header",
-		color: { kind: "theme" },
-		native: true,
-		styleKey: "note",
+		id: "important", name: "Important", aliases: ["important"], scope: "client-guide",
+		template: "title-body", icon: "alert-circle", font: "header",
+		color: { kind: "fixed", hex: "#c0392b" }, native: false, styleKey: "important",
 	},
 	{
-		id: "legend-in-the-mist-note",
-		name: "Note",
-		aliases: ["note"],
-		scope: "legend-in-the-mist",
-		template: "title-body",
-		icon: "sticky-note",
-		font: "header",
-		color: { kind: "theme" },
-		native: true,
-		styleKey: "note",
+		id: "astuce", name: "Astuce", aliases: ["astuce"], scope: "client-guide",
+		template: "title-body", icon: "lightbulb", font: "header",
+		color: { kind: "fixed", hex: "#27965e" }, native: false, styleKey: "astuce",
 	},
 	{
-		id: "legend-in-the-mist-read-aloud",
-		name: "Lecture à voix haute",
-		aliases: ["read-aloud"],
-		scope: "legend-in-the-mist",
-		template: "body-only",
-		icon: "mic",
-		font: "text",
-		color: { kind: "theme" },
-		native: true,
-		styleKey: "read-aloud",
+		id: "attention", name: "Attention", aliases: ["attention"], scope: "client-guide",
+		template: "title-body", icon: "alert-triangle", font: "header",
+		color: { kind: "fixed", hex: "#d68910" }, native: false, styleKey: "attention",
 	},
-	...PBTA_CALLOUTS,
+	{
+		id: "a-faire-client", name: "À faire (client)", aliases: ["a-faire-client", "à-faire-client"], scope: "client-guide",
+		template: "title-body", icon: "list-todo", font: "header",
+		color: { kind: "fixed", hex: "#2f6fb0" }, native: false, styleKey: "a-faire-client",
+	},
 ];

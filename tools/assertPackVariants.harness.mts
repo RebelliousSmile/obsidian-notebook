@@ -16,7 +16,9 @@ import {
 	setNotebookVariantClass,
 } from "../src/features/modes/domModeClass";
 
-assert.equal(resolvePackRegistration("city-of-mist").pack.id, "none");
+// Before any custom pack is loaded, an unresolved id falls back to the first
+// declared pack — "gestion-projet" is declared first in `DECLARED_PACKS`.
+assert.equal(resolvePackRegistration("city-of-mist").pack.id, "gestion-projet");
 
 const emptyStyle = {
 	base: { note: {}, workspace: {} },
@@ -51,9 +53,9 @@ initPackRegistry([
 
 assert.deepEqual(
 	STYLE_PACKS.map((pack) => pack.id),
-	["city-of-mist", "legend-in-the-mist", "otherscape"],
+	["gestion-projet", "client-guide", "city-of-mist", "legend-in-the-mist", "otherscape"],
 );
-assert.equal(PACK_REGISTRATIONS.length, 3);
+assert.equal(PACK_REGISTRATIONS.length, 5);
 
 const otherscape = resolvePackRegistration("otherscape");
 assert.deepEqual(
@@ -63,7 +65,7 @@ assert.deepEqual(
 assert.equal(normalizePackVariantId("otherscape", "missing"), "metro");
 assert.equal(normalizePackVariantId("city-of-mist", "metro"), null);
 
-assert.equal(resolvePackRegistration("adrenaline").pack.id, "city-of-mist");
+assert.equal(resolvePackRegistration("adrenaline").pack.id, "gestion-projet");
 assert.equal(normalizePackVariantId("adrenaline", "metro"), null);
 
 const cairo = resolvePackAppearance(otherscape, "cairo", {
@@ -74,8 +76,9 @@ assert.equal(cairo.style.dark.note["--background-primary"], "#102B27");
 assert.equal(cairo.style.dark.note["--h1-color"], "#USER");
 assert.deepEqual(cairo.polarities, ["light", "dark"]);
 
-const city = resolvePackAppearance(resolvePackRegistration("city-of-mist"), null);
-assert.deepEqual(city.style, STYLE_PACKS[0].style);
+const cityRegistration = resolvePackRegistration("city-of-mist");
+const city = resolvePackAppearance(cityRegistration, null);
+assert.deepEqual(city.style, cityRegistration.pack.style);
 assert.equal(city.variant, null);
 
 assert.deepEqual(packVariantClasses(), [

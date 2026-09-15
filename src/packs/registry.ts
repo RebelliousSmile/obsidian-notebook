@@ -1,6 +1,8 @@
 import { logScope } from "../utils/logger";
 import { EMPTY_STYLE, StylePack, isValidStylePackId } from "./types";
 import type { InstalledPackPlugin } from "./pluginManifest";
+import { gestionProjetPack } from "./gestionProjet";
+import { clientGuidePack } from "./clientGuide";
 import {
 	PackRegistration,
 	packVariantClass,
@@ -27,7 +29,10 @@ function reportConflictOnce(id: string, message: string): void {
 }
 
 /** Notebook owns renderers, never pack design: packs are installed data. */
-const DECLARED_PACKS: PackRegistration[] = [];
+const DECLARED_PACKS: PackRegistration[] = [
+	{ pack: gestionProjetPack },
+	{ pack: clientGuidePack },
+];
 
 /**
  * A pack whose identifier is not safe as a class name is left out rather than

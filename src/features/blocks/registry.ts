@@ -6,11 +6,12 @@ import { logScope } from "../../utils/logger";
 import { renderRawBlock } from "./fallback";
 import { NotebookBlock, blockIds, isBlockEnabled } from "./types";
 import { BLOCK_SCOPE_CLASS } from "../modes/domModeClass";
+import { statusBlock } from "../status/block";
 
 const log = logScope("Blocks");
 
 /** Every fenced block Notebook knows. Adding a format means adding a line here. */
-export const NOTEBOOK_BLOCKS: NotebookBlock<unknown>[] = [];
+export const NOTEBOOK_BLOCKS: NotebookBlock<unknown>[] = [statusBlock];
 
 function requiredCapabilities(settings: NotebookSettings): readonly string[] {
 	return findPackRegistration(settings.mode)?.installation?.requires ?? [];

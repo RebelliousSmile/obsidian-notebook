@@ -1,0 +1,19 @@
+// The four states a status item's own class carries — structural, and
+// independent of the active pack, like `_fallbacks.scss`.
+
+.notebook-status-item--todo {
+	color: var(--text-muted);
+}
+
+.notebook-status-item--doing {
+	color: var(--text-accent);
+}
+
+.notebook-status-item--done {
+	color: var(--text-success, #3f9d6b);
+	text-decoration: line-through;
+}
+
+.notebook-status-item--blocked {
+	color: var(--text-error, #c0392b);
+}

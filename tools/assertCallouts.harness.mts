@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { log } from "../src/utils/logger";
 import { NATIVE_CALLOUTS } from "../src/features/callouts/nativeCallouts";
-import { isCalloutAvailable } from "../src/features/callouts/types";
 import { normalizeSettings } from "../src/settings/types";
 
 log.setLevel("warn");
@@ -19,16 +18,8 @@ log.setLevel("warn");
 		const migrated = settings.callouts.find((c) => c.id === native.id);
 		assert.ok(migrated);
 		assert.deepEqual(migrated.aliases, native.aliases);
-		assert.equal(migrated.native, true);
+		assert.equal(migrated.native, native.native);
 	}
-}
-
-// Portable callouts follow the manifest capability, independently of pack id.
-{
-	const pbta = NATIVE_CALLOUTS.filter((entry) => entry.capability === "style:pbta");
-	assert.equal(pbta.length, 4);
-	assert.equal(pbta.every((entry) => !isCalloutAvailable(entry, "unknown-pack", [])), true);
-	assert.equal(pbta.every((entry) => isCalloutAvailable(entry, "unknown-pack", ["style:pbta"])), true);
 }
 
 // An unsafe scope is discarded and warned once; a safe plugin id is allowed
@@ -69,22 +60,22 @@ log.setLevel("warn");
 		callouts: [
 			...NATIVE_CALLOUTS,
 			{
-				id: "adrenaline-action",
-				name: "Action Adrenaline",
-				aliases: ["action-adrenaline"],
-				scope: "adrenaline",
+				id: "un-plugin-installe-action",
+				name: "Action du plugin",
+				aliases: ["action-du-plugin"],
+				scope: "un-plugin-installe",
 				template: "body-only",
 				font: "text",
 				color: { kind: "theme" },
 				native: false,
-				styleKey: "adrenaline-action",
+				styleKey: "un-plugin-installe-action",
 			},
 		],
 	});
 
-	const pluginEntry = settings.callouts.find((c) => c.id === "adrenaline-action");
+	const pluginEntry = settings.callouts.find((c) => c.id === "un-plugin-installe-action");
 	assert.ok(pluginEntry);
-	assert.equal(pluginEntry.scope, "adrenaline");
+	assert.equal(pluginEntry.scope, "un-plugin-installe");
 }
 
 // A valid user entry at scope "all" survives, keeps its id and gets
@@ -123,7 +114,7 @@ log.setLevel("warn");
 			{
 				name: "Note",
 				aliases: ["custom-note"],
-				scope: "otherscape",
+				scope: "un-autre-plugin",
 				template: "body-only",
 				font: "text",
 				color: { kind: "theme" },
