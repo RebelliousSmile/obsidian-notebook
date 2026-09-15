@@ -6,7 +6,10 @@ export const clientGuidePack: StylePack = {
 	label: "Guide client",
 	polarities: ["light"],
 	style: {
-		base: { note: tokens(accent("#2f9e6e")), workspace: {} },
+		base: {
+			note: tokens(accent("#2f9e6e")),
+			workspace: tokens(accent("#2f9e6e")),
+		},
 		light: EMPTY_LAYER,
 		dark: EMPTY_LAYER,
 	},

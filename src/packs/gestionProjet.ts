@@ -6,8 +6,17 @@ export const gestionProjetPack: StylePack = {
 	label: "Gestion de projet",
 	polarities: ["light", "dark"],
 	style: {
-		base: { note: tokens(accent("#4c6ef5")), workspace: {} },
-		light: { note: tokens({ "--background-secondary": "#f3f5f9" }), workspace: {} },
-		dark: { note: tokens({ "--background-secondary": "#20242f" }), workspace: {} },
+		base: {
+			note: tokens(accent("#4c6ef5")),
+			workspace: tokens(accent("#4c6ef5")),
+		},
+		light: {
+			note: tokens({ "--background-secondary": "#f3f5f9" }),
+			workspace: tokens({ "--background-secondary": "#f3f5f9" }),
+		},
+		dark: {
+			note: tokens({ "--background-secondary": "#20242f" }),
+			workspace: tokens({ "--background-secondary": "#20242f" }),
+		},
 	},
 };
