@@ -295,7 +295,7 @@ async function run(): Promise<void> {
 		check("block capabilities match NOTEBOOK_BLOCKS", JSON.stringify(declared) === JSON.stringify(registered));
 		for (const block of NOTEBOOK_BLOCKS) {
 			if (!block.capability) continue;
-			const packId = "unknown-pbta-pack";
+			const packId = "unknown-external-pack";
 			const result = packPlugin(packId, { requires: [`block:${block.id}`] });
 			const parsed = JSON.parse(result) as unknown;
 			const manifest = (await import("../src/packs/pluginManifest")).readPackPluginManifest(parsed, HOST_VERSION);

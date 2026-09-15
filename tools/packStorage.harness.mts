@@ -96,15 +96,15 @@ function fakePlugin(initialFiles: Record<string, string>, failCopy = "") {
 async function run(): Promise<void> {
 	{
 		const state = fakePlugin({
-			"plugins/obsidian-notebook/packs/adrenaline/pack.json": "pack",
-			"plugins/obsidian-notebook/packs/adrenaline/assets/paper.webp": "image",
+			"plugins/obsidian-notebook/packs/sample-pack/pack.json": "pack",
+			"plugins/obsidian-notebook/packs/sample-pack/assets/paper.webp": "image",
 			"plugins/obsidian-notebook/overrides.json": "override",
 		});
 		const paths = packStoragePaths(state.plugin);
 		check("configDir determines the root", paths.root === ".config-obsidian/notebook");
 		await preparePackStorage(state.plugin);
-		check("the pack manifest migrates", state.files.has(`${paths.packs}/adrenaline/pack.json`));
-		check("nested assets migrate", state.files.has(`${paths.packs}/adrenaline/assets/paper.webp`));
+		check("the pack manifest migrates", state.files.has(`${paths.packs}/sample-pack/pack.json`));
+		check("nested assets migrate", state.files.has(`${paths.packs}/sample-pack/assets/paper.webp`));
 		check("the override migrates", state.files.get(paths.overrides) === "override");
 		state.directories.delete("plugins/obsidian-notebook/packs");
 		check("persistent packs survive plugin replacement", await packsReadPath(state.plugin) === paths.packs);
@@ -123,7 +123,7 @@ async function run(): Promise<void> {
 	}
 
 	{
-		const source = "plugins/obsidian-notebook/packs/adrenaline/pack.json";
+		const source = "plugins/obsidian-notebook/packs/sample-pack/pack.json";
 		const state = fakePlugin({ [source]: "pack" }, source);
 		const paths = packStoragePaths(state.plugin);
 		await preparePackStorage(state.plugin);
@@ -132,7 +132,7 @@ async function run(): Promise<void> {
 		check("failed migration preserves the source", state.files.get(source) === "pack");
 		state.allowCopies();
 		await preparePackStorage(state.plugin);
-		check("a failed migration is retryable", state.files.get(`${paths.packs}/adrenaline/pack.json`) === "pack");
+		check("a failed migration is retryable", state.files.get(`${paths.packs}/sample-pack/pack.json`) === "pack");
 	}
 }
 

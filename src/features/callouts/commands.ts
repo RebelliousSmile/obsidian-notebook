@@ -12,9 +12,9 @@ function commandId(entry: CalloutDefinition): string {
 
 /**
  * The callout's own name, suffixed by the pack whenever its scope is not
- * "all" — deterministic, not only on a collision, so the two native "Note"
- * entries (City of Mist, Legend in the Mist) read apart in the command
- * palette and the Hotkeys panel.
+ * "all" — deterministic, not only on a collision, so the two native "Astuce"
+ * entries (gestion-projet's "tip", client-guide's "astuce") read apart in
+ * the command palette and the Hotkeys panel.
  */
 export function calloutCommandName(entry: CalloutDefinition): string {
 	if (entry.scope === "all") {

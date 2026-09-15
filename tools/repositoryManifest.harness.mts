@@ -8,8 +8,8 @@ function check(label: string, held: boolean): void {
 
 const valid = {
 	manifestVersion: 1,
-	repository: "RebelliousSmile/schema-pbta",
-	name: "Schema PbtA",
+	repository: "owner/schema-packs",
+	name: "Schema Packs",
 	packs: [
 		{ id: "apocalypse-world", version: "1.0.0", path: "notebook/apocalypse-world/pack.json" },
 		{ id: "monster-of-the-week", version: "1.2.0", path: "notebook/monster-of-the-week/pack.json" },
