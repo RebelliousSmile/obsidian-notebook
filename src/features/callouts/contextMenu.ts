@@ -1,8 +1,8 @@
 import { Editor, Menu } from "obsidian";
-import { BrumesSettings } from "../../settings/types";
+import { NotebookSettings } from "../../settings/types";
 import { CalloutDefinition } from "./types";
 import { isCalloutAvailable } from "./types";
-import { findGameRegistration } from "../../games/registry";
+import { findPackRegistration } from "../../packs/registry";
 
 interface CalloutInsertion {
 	title: string;
@@ -13,11 +13,11 @@ interface CalloutInsertion {
 
 /** Callouts visible from `activePackId`: scope "all", or that same pack — same filter as `buildAliasMap`. */
 export function getAvailableCalloutInsertions(
-	settings: BrumesSettings,
+	settings: NotebookSettings,
 	activePackId: string,
 ): CalloutInsertion[] {
 	const insertions: CalloutInsertion[] = [];
-	const required = findGameRegistration(activePackId)?.installation?.requires ?? [];
+	const required = findPackRegistration(activePackId)?.installation?.requires ?? [];
 
 	for (const entry of settings.callouts) {
 		if (!isCalloutAvailable(entry, activePackId, required)) {
@@ -43,7 +43,7 @@ export function getAvailableCalloutInsertions(
 export function contributeCalloutInsertions(
 	menu: Menu,
 	editor: Editor,
-	settings: BrumesSettings,
+	settings: NotebookSettings,
 	activePackId: string,
 ): number {
 	const callouts = getAvailableCalloutInsertions(settings, activePackId);

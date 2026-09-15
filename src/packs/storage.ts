@@ -1,14 +1,14 @@
 import type { DataAdapter, Plugin } from "obsidian";
 import { logScope } from "../utils/logger";
 
-const log = logScope("Games");
+const log = logScope("Packs");
 
-export const HANDBOOK_DATA_DIR_NAME = "handbook";
+export const NOTEBOOK_DATA_DIR_NAME = "notebook";
 export const PACKS_DIR_NAME = "packs";
 export const SOURCES_DIR_NAME = "sources";
 export const OVERRIDE_FILE_NAME = "overrides.json";
 
-export interface GameStoragePaths {
+export interface PackStoragePaths {
 	root: string;
 	packs: string;
 	overrides: string;
@@ -26,8 +26,8 @@ function joinPath(root: string, name: string): string {
 }
 
 /** User-owned files live beside Obsidian's config, not inside a replaceable plugin. */
-export function gameStoragePaths(plugin: Plugin): GameStoragePaths {
-	const root = joinPath(plugin.app.vault.configDir, HANDBOOK_DATA_DIR_NAME);
+export function packStoragePaths(plugin: Plugin): PackStoragePaths {
+	const root = joinPath(plugin.app.vault.configDir, NOTEBOOK_DATA_DIR_NAME);
 	const legacyRoot = plugin.manifest.dir ?? null;
 
 	return {
@@ -41,9 +41,9 @@ export function gameStoragePaths(plugin: Plugin): GameStoragePaths {
 	};
 }
 
-/** A source is fully owned by Handbook, unlike the backward-compatible packs folder. */
+/** A source is fully owned by Notebook, unlike the backward-compatible packs folder. */
 export function schemaSourceStoragePaths(plugin: Plugin, sourceId: string): SchemaSourceStoragePaths {
-	const root = joinPath(joinPath(gameStoragePaths(plugin).root, SOURCES_DIR_NAME), sourceId);
+	const root = joinPath(joinPath(packStoragePaths(plugin).root, SOURCES_DIR_NAME), sourceId);
 	return { root, staging: `${root}.staging` };
 }
 
@@ -87,7 +87,7 @@ async function copyDirectory(
 
 async function migratePacks(
 	adapter: DataAdapter,
-	paths: GameStoragePaths,
+	paths: PackStoragePaths,
 ): Promise<void> {
 	if (
 		(await adapter.exists(paths.packs)) ||
@@ -103,11 +103,11 @@ async function migratePacks(
 	try {
 		await copyDirectory(adapter, paths.legacyPacks, temporary);
 		await adapter.rename(temporary, paths.packs);
-		log.info(`Migrated game plugins to "${paths.packs}".`);
+		log.info(`Migrated pack plugins to "${paths.packs}".`);
 	} catch (error) {
 		await removeTemporaryDirectory(adapter, temporary);
 		log.error(
-			`Could not migrate game plugins to "${paths.packs}"; the legacy source is left untouched.`,
+			`Could not migrate pack plugins to "${paths.packs}"; the legacy source is left untouched.`,
 			error,
 		);
 	}
@@ -115,7 +115,7 @@ async function migratePacks(
 
 async function migrateOverrides(
 	adapter: DataAdapter,
-	paths: GameStoragePaths,
+	paths: PackStoragePaths,
 ): Promise<void> {
 	if (
 		(await adapter.exists(paths.overrides)) ||
@@ -148,9 +148,9 @@ async function migrateOverrides(
 	}
 }
 
-/** Best-effort migration. Failure never prevents Handbook from loading. */
-export async function prepareGameStorage(plugin: Plugin): Promise<GameStoragePaths> {
-	const paths = gameStoragePaths(plugin);
+/** Best-effort migration. Failure never prevents Notebook from loading. */
+export async function preparePackStorage(plugin: Plugin): Promise<PackStoragePaths> {
+	const paths = packStoragePaths(plugin);
 	const adapter = plugin.app.vault.adapter;
 
 	try {
@@ -158,7 +158,7 @@ export async function prepareGameStorage(plugin: Plugin): Promise<GameStoragePat
 		await migratePacks(adapter, paths);
 		await migrateOverrides(adapter, paths);
 	} catch (error) {
-		log.error(`Could not prepare Handbook storage at "${paths.root}".`, error);
+		log.error(`Could not prepare Notebook storage at "${paths.root}".`, error);
 	}
 
 	return paths;
@@ -172,7 +172,7 @@ export async function replaceSchemaSource(
 	const adapter = plugin.app.vault.adapter;
 	const paths = schemaSourceStoragePaths(plugin, sourceId);
 	const backup = `${paths.root}.previous`;
-	await ensureStorageDirectory(adapter, joinPath(gameStoragePaths(plugin).root, SOURCES_DIR_NAME));
+	await ensureStorageDirectory(adapter, joinPath(packStoragePaths(plugin).root, SOURCES_DIR_NAME));
 	await removeTemporaryDirectory(adapter, paths.staging);
 	await removeTemporaryDirectory(adapter, backup);
 	try {
@@ -206,7 +206,7 @@ export async function removeSchemaSourceStorage(
 
 /** Persistent data wins; legacy is a one-cycle fallback when migration failed. */
 export async function packsReadPath(plugin: Plugin): Promise<string> {
-	const paths = gameStoragePaths(plugin);
+	const paths = packStoragePaths(plugin);
 	if (await plugin.app.vault.adapter.exists(paths.packs)) {
 		return paths.packs;
 	}
@@ -220,7 +220,7 @@ export async function packsReadPath(plugin: Plugin): Promise<string> {
 }
 
 export async function overridesReadPath(plugin: Plugin): Promise<string> {
-	const paths = gameStoragePaths(plugin);
+	const paths = packStoragePaths(plugin);
 	if (await plugin.app.vault.adapter.exists(paths.overrides)) {
 		return paths.overrides;
 	}

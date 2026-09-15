@@ -23,12 +23,12 @@ log.setLevel("warn");
 	}
 }
 
-// Portable callouts follow the manifest capability, independently of game id.
+// Portable callouts follow the manifest capability, independently of pack id.
 {
 	const pbta = NATIVE_CALLOUTS.filter((entry) => entry.capability === "style:pbta");
 	assert.equal(pbta.length, 4);
-	assert.equal(pbta.every((entry) => !isCalloutAvailable(entry, "unknown-game", [])), true);
-	assert.equal(pbta.every((entry) => isCalloutAvailable(entry, "unknown-game", ["style:pbta"])), true);
+	assert.equal(pbta.every((entry) => !isCalloutAvailable(entry, "unknown-pack", [])), true);
+	assert.equal(pbta.every((entry) => isCalloutAvailable(entry, "unknown-pack", ["style:pbta"])), true);
 }
 
 // An unsafe scope is discarded and warned once; a safe plugin id is allowed
@@ -45,7 +45,7 @@ log.setLevel("warn");
 				id: "user-secret",
 				name: "Secret de faction",
 				aliases: ["secret"],
-				scope: "../not-a-game",
+				scope: "../not-a-pack",
 				template: "body-only",
 				font: "text",
 				color: { kind: "fixed", hex: "#e2c6c5" },

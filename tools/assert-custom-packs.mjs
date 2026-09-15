@@ -11,7 +11,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { spawnSync } from "child_process";
 
-const work = mkdtempSync(join(tmpdir(), "handbook-custom-packs-"));
+const work = mkdtempSync(join(tmpdir(), "notebook-custom-packs-"));
 const stub = join(work, "obsidian-stub.mjs");
 const bundle = join(work, "harness.cjs");
 

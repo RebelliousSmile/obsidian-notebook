@@ -1,4 +1,4 @@
-/** A public GitHub repository registered as a Handbook schema source. */
+/** A public GitHub repository registered as a Notebook schema source. */
 export interface SchemaSource {
 	repository: string;
 	/** Stable, filesystem-safe identity derived from the canonical repository. */

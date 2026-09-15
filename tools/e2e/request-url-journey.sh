@@ -2,12 +2,12 @@
 set -Eeuo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-VAULT="${HANDBOOK_E2E_VAULT:-}"
-APP="${HANDBOOK_E2E_OBSIDIAN:-}"
-PLUGIN_ASSETS="${HANDBOOK_E2E_PLUGIN_DIR:-$REPO_ROOT/dist}"
-CDP_PORT="${HANDBOOK_E2E_CDP_PORT:-9223}"
-ALLOW_MUTATION="${HANDBOOK_E2E_ALLOW_MUTATION:-0}"
-OUTPUT_DIR="${HANDBOOK_E2E_OUTPUT_DIR:-}"
+VAULT="${NOTEBOOK_E2E_VAULT:-}"
+APP="${NOTEBOOK_E2E_OBSIDIAN:-}"
+PLUGIN_ASSETS="${NOTEBOOK_E2E_PLUGIN_DIR:-$REPO_ROOT/dist}"
+CDP_PORT="${NOTEBOOK_E2E_CDP_PORT:-9223}"
+ALLOW_MUTATION="${NOTEBOOK_E2E_ALLOW_MUTATION:-0}"
+OUTPUT_DIR="${NOTEBOOK_E2E_OUTPUT_DIR:-}"
 APP_PID=""
 BACKUP=""
 CURRENT_STEP="setup"
@@ -16,9 +16,9 @@ LAST_COMPLETED=0
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
 require_command() { command -v "$1" >/dev/null || fail "missing command: $1"; }
 
-[[ "$ALLOW_MUTATION" == "1" ]] || fail "set HANDBOOK_E2E_ALLOW_MUTATION=1 to authorize temporary vault changes"
-[[ -n "$VAULT" ]] || fail "HANDBOOK_E2E_VAULT is required"
-[[ -n "$APP" ]] || fail "HANDBOOK_E2E_OBSIDIAN is required"
+[[ "$ALLOW_MUTATION" == "1" ]] || fail "set NOTEBOOK_E2E_ALLOW_MUTATION=1 to authorize temporary vault changes"
+[[ -n "$VAULT" ]] || fail "NOTEBOOK_E2E_VAULT is required"
+[[ -n "$APP" ]] || fail "NOTEBOOK_E2E_OBSIDIAN is required"
 [[ -d "$VAULT/.obsidian" ]] || fail "not an Obsidian vault: $VAULT"
 [[ -x "$APP" ]] || fail "Obsidian executable is not executable: $APP"
 for command_name in curl jq python3 sha256sum cmp find sort setsid pgrep realpath rg seq stat tail xargs; do
@@ -29,8 +29,8 @@ PLUGIN_ASSETS="$(realpath "$PLUGIN_ASSETS")"
 [[ "$VAULT" != "/" && "$VAULT" != "$HOME" ]] || fail "unsafe vault path"
 COMMUNITY_PLUGINS="$VAULT/.obsidian/community-plugins.json"
 [[ -f "$COMMUNITY_PLUGINS" ]] || fail "missing community-plugins.json in the selected vault"
-jq -e 'index("obsidian-handbook") != null' "$COMMUNITY_PLUGINS" >/dev/null ||
-  fail "obsidian-handbook is not enabled in the selected vault"
+jq -e 'index("obsidian-notebook") != null' "$COMMUNITY_PLUGINS" >/dev/null ||
+  fail "obsidian-notebook is not enabled in the selected vault"
 for asset in main.js manifest.json styles.css; do
   [[ -f "$PLUGIN_ASSETS/$asset" ]] || fail "missing plugin asset: $PLUGIN_ASSETS/$asset"
 done
@@ -42,26 +42,26 @@ if curl -fsS "http://127.0.0.1:$CDP_PORT/json/version" >/dev/null 2>&1; then
   fail "CDP port $CDP_PORT is already in use"
 fi
 
-PLUGIN="$VAULT/.obsidian/plugins/obsidian-handbook"
-STORAGE="$VAULT/.obsidian/handbook"
+PLUGIN="$VAULT/.obsidian/plugins/obsidian-notebook"
+STORAGE="$VAULT/.obsidian/notebook"
 DATA_JSON="$PLUGIN/data.json"
 SOURCE="$STORAGE/sources/rebellioussmile--schema-in-the-mist"
 SOURCE_JSON="$SOURCE/source.json"
-OBSIDIAN_LOG="${HANDBOOK_E2E_OBSIDIAN_LOG:-$HOME/.config/obsidian/obsidian.log}"
+OBSIDIAN_LOG="${NOTEBOOK_E2E_OBSIDIAN_LOG:-$HOME/.config/obsidian/obsidian.log}"
 VAULT_PARENT="$(dirname "$VAULT")"
 if [[ -z "$OUTPUT_DIR" ]]; then
-  OUTPUT_DIR="$(mktemp -d /tmp/handbook-request-url-e2e.XXXXXX)"
+  OUTPUT_DIR="$(mktemp -d /tmp/notebook-request-url-e2e.XXXXXX)"
 else
   mkdir -p "$OUTPUT_DIR"
   OUTPUT_DIR="$(realpath "$OUTPUT_DIR")"
   [[ -z "$(find "$OUTPUT_DIR" -mindepth 1 -maxdepth 1 -print -quit)" ]] ||
-    fail "HANDBOOK_E2E_OUTPUT_DIR must be empty"
+    fail "NOTEBOOK_E2E_OUTPUT_DIR must be empty"
 fi
 case "$OUTPUT_DIR/" in
-  "$VAULT/"*) fail "HANDBOOK_E2E_OUTPUT_DIR must be outside the vault" ;;
+  "$VAULT/"*) fail "NOTEBOOK_E2E_OUTPUT_DIR must be outside the vault" ;;
 esac
-export HANDBOOK_E2E_CDP_PORT="$CDP_PORT"
-export HANDBOOK_E2E_OUTPUT_DIR="$OUTPUT_DIR"
+export NOTEBOOK_E2E_CDP_PORT="$CDP_PORT"
+export NOTEBOOK_E2E_OUTPUT_DIR="$OUTPUT_DIR"
 REPORT="$OUTPUT_DIR/REPORT.md"
 
 cat >"$REPORT" <<'EOF'
@@ -147,18 +147,24 @@ trap restore EXIT INT TERM
 compare_revision() {
   local revision="$1" label="$2"
   local base="https://raw.githubusercontent.com/RebelliousSmile/schema-in-the-mist/$revision"
-  curl -fsSLo "$OUTPUT_DIR/$label-handbook.json" "$base/handbook.json"
+  # NOTE: "handbook" below refers to the fixed, unrenamed filename/path
+  # convention of the external RebelliousSmile/schema-in-the-mist GitHub
+  # repository fetched by this journey — that third-party content was not
+  # touched by this fork's rename and still serves its manifest at
+  # "handbook.json" / "handbook/<pack>". Only the local $SOURCE cache below
+  # (this plugin's own storage) follows the renamed "notebook.json" convention.
+  curl -fsSLo "$OUTPUT_DIR/$label-notebook.json" "$base/handbook.json"
   curl -fsSLo "$OUTPUT_DIR/$label-pack.json" "$base/handbook/legend-in-the-mist/pack.json"
   local first_image assets_root
   first_image="$(jq -r '.pack.assets.images | to_entries[0].value' "$OUTPUT_DIR/$label-pack.json")"
   assets_root="$(jq -r '.pack.assets.root // "assets"' "$OUTPUT_DIR/$label-pack.json")"
   curl -fsSLo "$OUTPUT_DIR/$label-first-image" "$base/handbook/legend-in-the-mist/$assets_root/$first_image"
-  cmp "$OUTPUT_DIR/$label-handbook.json" "$SOURCE/handbook.json"
+  cmp "$OUTPUT_DIR/$label-notebook.json" "$SOURCE/notebook.json"
   cmp "$OUTPUT_DIR/$label-pack.json" "$SOURCE/packs/legend-in-the-mist/pack.json"
   cmp "$OUTPUT_DIR/$label-first-image" "$SOURCE/packs/legend-in-the-mist/$assets_root/$first_image"
 }
 
-BACKUP="$(mktemp -d "$VAULT_PARENT/.handbook-request-url-e2e.XXXXXX")"
+BACKUP="$(mktemp -d "$VAULT_PARENT/.notebook-request-url-e2e.XXXXXX")"
 snapshot_tree "$PLUGIN" "$OUTPUT_DIR/plugin.before"
 snapshot_tree "$STORAGE" "$OUTPUT_DIR/storage.before"
 [[ -d "$PLUGIN" ]] && mv "$PLUGIN" "$BACKUP/plugin"

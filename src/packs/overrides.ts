@@ -3,56 +3,56 @@ import { ShapeOverrides } from "../features/blocks/shape";
 import { logScope } from "../utils/logger";
 import { readPackTokens, readPolarities, readShapeOverrides } from "./fromSchema";
 import {
-	GamePolarity,
-	GameStyleLayer,
-	GameStyleTokens,
-	GameStyleValues,
+	StylePolarity,
+	StyleLayer,
+	StyleTokens,
+	StyleValues,
 } from "./types";
 import { OVERRIDE_FILE_NAME, overridesReadPath } from "./storage";
 
-const log = logScope("Games");
+const log = logScope("Packs");
 
 /**
  * The file a user writes by hand, in the plugin's own folder in the vault.
  *
  * It is what replaces the sliders Style Settings used to offer: a pack that
  * declares nothing but what it wants to change, and takes the top over the
- * game's pack for exactly that. Anything it leaves out keeps the game's own,
- * so removing the file returns the rendering to the game untouched — the
+ * pack's pack for exactly that. Anything it leaves out keeps the pack's own,
+ * so removing the file returns the rendering to the pack untouched — the
  * values it writes and the shape of the blocks alike.
  */
 export { OVERRIDE_FILE_NAME } from "./storage";
 
-const LAYER_NAMES: (keyof GameStyleValues)[] = ["base", "light", "dark"];
-const SLOT_NAMES: (keyof GameStyleLayer)[] = ["note", "workspace"];
+const LAYER_NAMES: (keyof StyleValues)[] = ["base", "light", "dark"];
+const SLOT_NAMES: (keyof StyleLayer)[] = ["note", "workspace"];
 
-export type GameStyleOverride = {
-	[K in keyof GameStyleValues]?: {
-		[S in keyof GameStyleLayer]?: GameStyleTokens;
+export type StyleOverride = {
+	[K in keyof StyleValues]?: {
+		[S in keyof StyleLayer]?: StyleTokens;
 	};
 };
 
 /**
- * Everything the file may change: the values a game writes, and the shape of
+ * Everything the file may change: the values a pack writes, and the shape of
  * the blocks it draws. Both are read the way a pack document is read, because
  * the file is a pack document with most of it left out.
  */
-export interface GameOverride {
-	style: GameStyleOverride;
+export interface PackOverride {
+	style: StyleOverride;
 	shapes: ShapeOverrides;
 	/**
-	 * The polarities the file claims for the active game, or null when it
-	 * claims none and the game's own hold.
+	 * The polarities the file claims for the active pack, or null when it
+	 * claims none and the pack's own hold.
 	 *
 	 * It is here because the alternative is a trap: a file that writes dark
-	 * values for a game declaring only light would see them read, merged, and
+	 * values for a pack declaring only light would see them read, merged, and
 	 * then never written, with nothing on screen to say why. Claiming the
 	 * polarity is how the file asks for the layer to exist at all.
 	 */
-	polarities: GamePolarity[] | null;
+	polarities: StylePolarity[] | null;
 }
 
-export const EMPTY_OVERRIDE: GameOverride = {
+export const EMPTY_OVERRIDE: PackOverride = {
 	style: {},
 	shapes: {},
 	polarities: null,
@@ -62,7 +62,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function parseGameOverride(raw: string): GameOverride {
+export function parsePackOverride(raw: string): PackOverride {
 	let parsed: unknown;
 
 	try {
@@ -85,7 +85,7 @@ export function parseGameOverride(raw: string): GameOverride {
 	// into "pack" first.
 	const declared = isRecord(parsed.pack) ? parsed.pack : parsed;
 	const style = isRecord(declared.style) ? declared.style : declared;
-	const override: GameStyleOverride = {};
+	const override: StyleOverride = {};
 
 	for (const layerName of LAYER_NAMES) {
 		const layer = style[layerName];
@@ -100,7 +100,7 @@ export function parseGameOverride(raw: string): GameOverride {
 			continue;
 		}
 
-		const slots: { note?: GameStyleTokens; workspace?: GameStyleTokens } =
+		const slots: { note?: StyleTokens; workspace?: StyleTokens } =
 			{};
 
 		for (const slotName of SLOT_NAMES) {
@@ -134,9 +134,9 @@ export function parseGameOverride(raw: string): GameOverride {
 }
 
 function mergeLayer(
-	base: GameStyleLayer,
-	over: { note?: GameStyleTokens; workspace?: GameStyleTokens } | undefined,
-): GameStyleLayer {
+	base: StyleLayer,
+	over: { note?: StyleTokens; workspace?: StyleTokens } | undefined,
+): StyleLayer {
 	if (!over) {
 		return base;
 	}
@@ -147,11 +147,11 @@ function mergeLayer(
 	};
 }
 
-/** The game's values, with the ones the user declared written over them. */
-export function mergeGameStyle(
-	base: GameStyleValues,
-	override: GameStyleOverride,
-): GameStyleValues {
+/** The pack's values, with the ones the user declared written over them. */
+export function mergeStyle(
+	base: StyleValues,
+	override: StyleOverride,
+): StyleValues {
 	return {
 		base: mergeLayer(base.base, override.base),
 		light: mergeLayer(base.light, override.light),
@@ -164,9 +164,9 @@ export function mergeGameStyle(
  * manifest does not name all lead to an empty override, never to a load
  * failure.
  */
-export async function loadGameOverride(
+export async function loadPackOverride(
 	plugin: Plugin,
-): Promise<GameOverride> {
+): Promise<PackOverride> {
 	const path = await overridesReadPath(plugin);
 
 	try {
@@ -176,7 +176,7 @@ export async function loadGameOverride(
 			return EMPTY_OVERRIDE;
 		}
 
-		return parseGameOverride(await adapter.read(path));
+		return parsePackOverride(await adapter.read(path));
 	} catch (error) {
 		log.warn(`Could not read ${OVERRIDE_FILE_NAME}, ignoring it.`, error);
 		return EMPTY_OVERRIDE;

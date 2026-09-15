@@ -8,7 +8,7 @@ const log = logScope("Blocks");
  * The boundary this file draws, and that nothing may cross: a zone says
  * **what a block holds and in what order**. The SCSS says **where it sits and
  * how big it is**. There is no geometry here, no colour, no serialized CSS —
- * a consumer that is not Handbook must be able to draw a block from this
+ * a consumer that is not Notebook must be able to draw a block from this
  * vocabulary alone, with its own layout engine or none at all.
  *
  * That is also why the shapes below describe what the renderers already do
@@ -35,7 +35,7 @@ export interface BlockZone {
 	/**
 	 * The printed wording the zone opens with, when it opens with one.
 	 *
-	 * It is text a reader sees, so a game may want its own — "Menaces" where
+	 * It is text a reader sees, so a pack may want its own — "Menaces" where
 	 * another prints "Threats & consequences". Its position is the renderer's
 	 * business, not the vocabulary's: a heading is the first thing in its
 	 * zone, and nothing here says how it is marked up.
@@ -52,11 +52,11 @@ export interface BlockZone {
 	family?: string;
 	/**
 	 * The illustration role the zone carries, when it carries one — the
-	 * `--brumes-image-<role>` custom property the partial reads.
+	 * `--notebook-image-<role>` custom property the partial reads.
 	 *
 	 * Degrading is not this zone's job. A role with no file behind it already
-	 * puts `brumes-missing--<role>` on the body
-	 * (`setBrumesMissingAssetClasses`), and `_fallbacks.scss` answers it by
+	 * puts `notebook-missing--<role>` on the body
+	 * (`setNotebookMissingAssetClasses`), and `_fallbacks.scss` answers it by
 	 * flattening the zone: a background and a border instead of the frame,
 	 * never an empty box reserved for an image that is not coming.
 	 */
@@ -78,7 +78,7 @@ export interface BlockShape {
 	/**
 	 * The class the block's outermost element carries. Written out rather than
 	 * derived from the block id: the ids and the classes disagree by history
-	 * (`theme-card` draws `brumes-story-theme`), and the presets already in a
+	 * (`theme-card` draws `notebook-story-theme`), and the presets already in a
 	 * user's vault target the classes.
 	 */
 	root: string;
@@ -92,7 +92,7 @@ export interface BlockShape {
 	 * Written down rather than smoothed over. Every line here is a place where
 	 * the vocabulary is too thin for the screen, and knowing which is the
 	 * point: a consumer reads them as "there is more here than I can draw",
-	 * and a game pack reads them as what it cannot reach.
+	 * and a pack pack reads them as what it cannot reach.
 	 */
 	gaps?: string[];
 }
@@ -114,7 +114,7 @@ export function findZone(shape: BlockShape, name: string): BlockZone | null {
 }
 
 /**
- * What a game pack may change about one zone.
+ * What a pack pack may change about one zone.
  *
  * Partial by construction: what it does not name stays the block's. It can
  * reword a zone, point it at another illustration, or drop it — it cannot add
@@ -150,11 +150,11 @@ export function zoneOverrideFields(): string[] {
 }
 
 /**
- * The overrides in force, set by the plugin when the game changes.
+ * The overrides in force, set by the plugin when the pack changes.
  *
  * Module state rather than an argument because a renderer is a pure
- * `(data, doc)` and the game is not part of a block's data — a note does not
- * say which game it is read under, the vault does.
+ * `(data, doc)` and the pack is not part of a block's data — a note does not
+ * say which pack it is read under, the vault does.
  */
 let activeOverrides: ShapeOverrides = {};
 
@@ -167,7 +167,7 @@ export function getShapeOverrides(): ShapeOverrides {
 }
 
 /**
- * The user's file over the game's pack, zone by zone and field by field.
+ * The user's file over the pack's pack, zone by zone and field by field.
  *
  * Field by field and not zone by zone: a file that changes a heading must not
  * silently drop the illustration the pack put on the same zone.
@@ -281,7 +281,7 @@ export function resetShapeReports(): void {
  * optional zone with nothing to hold.
  *
  * The zone handed over is the resolved one, so a builder that prints a heading
- * prints the one the game asked for and not the one the block was written
+ * prints the one the pack asked for and not the one the block was written
  * with.
  */
 export type ZoneBuilder = (zone: BlockZone) => HTMLElement | null;

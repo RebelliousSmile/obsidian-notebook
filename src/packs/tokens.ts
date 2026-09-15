@@ -8,7 +8,7 @@
  * the interface derives its hovers and its active states.
  */
 
-import { GameStyleTokens } from "./types";
+import { StyleTokens } from "./types";
 
 function parseHex(hex: string): number[] | null {
 	const value = hex.charAt(0) === "#" ? hex.substring(1) : hex;
@@ -37,8 +37,8 @@ function round(value: number, decimals: number): number {
 }
 
 /** A named colour and the triple the interface composes into `rgba()`. */
-export function palette(colors: GameStyleTokens): GameStyleTokens {
-	const result: GameStyleTokens = {};
+export function palette(colors: StyleTokens): StyleTokens {
+	const result: StyleTokens = {};
 
 	for (const name of Object.keys(colors)) {
 		const hex = colors[name];
@@ -55,8 +55,8 @@ export function palette(colors: GameStyleTokens): GameStyleTokens {
 }
 
 /** The accent, as the three parts the interface derives its states from. */
-export function accent(hex: string): GameStyleTokens {
-	const result: GameStyleTokens = {
+export function accent(hex: string): StyleTokens {
+	const result: StyleTokens = {
 		"--color-accent": hex,
 		"--interactive-accent": hex,
 	};
@@ -101,8 +101,8 @@ export function accent(hex: string): GameStyleTokens {
 }
 
 /** Assemble a layer from several records, later ones winning. */
-export function tokens(...parts: GameStyleTokens[]): GameStyleTokens {
-	const merged: GameStyleTokens = {};
+export function tokens(...parts: StyleTokens[]): StyleTokens {
+	const merged: StyleTokens = {};
 
 	for (const part of parts) {
 		for (const name of Object.keys(part)) {

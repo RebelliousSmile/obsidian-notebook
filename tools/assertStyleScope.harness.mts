@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import {
-	buildGameStyle,
-	GameStyleWriter,
+	buildStyle,
+	StyleWriter,
 } from "../src/features/modes/styleElement";
-import { readPackTokens } from "../src/games/fromSchema";
+import { readPackTokens } from "../src/packs/fromSchema";
 import { normalizeSettings } from "../src/settings/types";
 
-const css = buildGameStyle(
+const css = buildStyle(
 	"test-pack",
 	{
 		base: {
@@ -29,13 +29,13 @@ assert.doesNotMatch(css, /--test-workspace-/);
 assert.match(css, /\.workspace-leaf-content\[data-type="markdown"\]/);
 assert.match(css, /\.markdown-source-view/);
 assert.match(css, /\.markdown-reading-view/);
-assert.match(css, /\.brumes-block-scope\.brumes--test-pack/);
+assert.match(css, /\.notebook-block-scope\.notebook--test-pack/);
 assert.doesNotMatch(
 	css,
-	/body\.brumes--test-pack\s*\{[^}]*--test-note-/,
+	/body\.notebook--test-pack\s*\{[^}]*--test-note-/,
 );
 
-const workspaceCss = buildGameStyle(
+const workspaceCss = buildStyle(
 	"test-pack",
 	{
 		base: {
@@ -54,10 +54,10 @@ const workspaceCss = buildGameStyle(
 
 assert.match(
 	workspaceCss,
-	/body\.brumes--test-pack\.brumes--workspace-theme\s*\{[^}]*--test-workspace-base: workspace-base/,
+	/body\.notebook--test-pack\.notebook--workspace-theme\s*\{[^}]*--test-workspace-base: workspace-base/,
 );
 
-const forcedDarkCss = buildGameStyle(
+const forcedDarkCss = buildStyle(
 	"test-pack",
 	{
 		base: { note: {}, workspace: {} },
@@ -75,7 +75,7 @@ const forcedDarkCss = buildGameStyle(
 	"dark",
 );
 
-assert.match(forcedDarkCss, /\.brumes--colour-dark/);
+assert.match(forcedDarkCss, /\.notebook--colour-dark/);
 assert.match(forcedDarkCss, /--forced-dark: dark/);
 assert.doesNotMatch(forcedDarkCss, /\.theme-dark/);
 assert.doesNotMatch(forcedDarkCss, /--forced-light/);
@@ -99,15 +99,15 @@ const styleDocument = {
 		},
 	},
 };
-const writer = new GameStyleWriter();
+const writer = new StyleWriter();
 writer.addDocument(styleDocument as unknown as Document);
-writer.applyGameStyle(workspaceCss);
-const styleElement = styleElements.get("brumes-game-style");
+writer.applyStyle(workspaceCss);
+const styleElement = styleElements.get("notebook-style");
 assert.equal(styleElement?.textContent, workspaceCss);
-writer.applyGameStyle(".brumes--other-pack { --other-only: true; }");
+writer.applyStyle(".notebook--other-pack { --other-only: true; }");
 assert.equal(
 	styleElement?.textContent,
-	".brumes--other-pack { --other-only: true; }",
+	".notebook--other-pack { --other-only: true; }",
 );
 assert.doesNotMatch(styleElement?.textContent ?? "", /test-note/);
 
@@ -117,15 +117,15 @@ assert.equal(
 	"light",
 );
 assert.equal(normalizeSettings({ colourScheme: "dark" }).colourScheme, "dark");
-assert.deepEqual(normalizeSettings(undefined).gameVariants, {});
-assert.deepEqual(normalizeSettings({ gameVariants: { "retired-pack": "retired" } }).gameVariants, {});
+assert.deepEqual(normalizeSettings(undefined).packVariants, {});
+assert.deepEqual(normalizeSettings({ packVariants: { "retired-pack": "retired" } }).packVariants, {});
 assert.equal(
 	normalizeSettings({ colourScheme: "sepia" as "dark" }).colourScheme,
 	"obsidian",
 );
 assert.match(
 	workspaceCss,
-	/body\.brumes--test-pack\.brumes--workspace-theme\s*\{[^}]*--test-workspace-light: workspace-light/,
+	/body\.notebook--test-pack\.notebook--workspace-theme\s*\{[^}]*--test-workspace-light: workspace-light/,
 );
 
 /* ------------------------------------------------------------------ *
@@ -138,14 +138,14 @@ const maliciousTokens = readPackTokens(
 	{
 		"--safe-token": "red",
 		"--evil} body { background: url(https://example.com/exfil?": "x",
-		"--also-evil; } .brumes--other-pack": "x",
+		"--also-evil; } .notebook--other-pack": "x",
 	},
 	"style scope injection probe",
 );
 
 assert.deepEqual(Object.keys(maliciousTokens), ["--safe-token"]);
 
-const injectedCss = buildGameStyle(
+const injectedCss = buildStyle(
 	"test-pack",
 	{
 		base: {
@@ -163,4 +163,4 @@ assert.doesNotMatch(injectedCss, /exfil/);
 assert.doesNotMatch(injectedCss, /evil/);
 assert.match(injectedCss, /--safe-token: red/);
 
-console.log("game styles stay inside notes and rendered block scopes");
+console.log("pack styles stay inside notes and rendered block scopes");

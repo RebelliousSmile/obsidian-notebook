@@ -1,15 +1,15 @@
 import { App, Notice, PluginSettingTab, SettingGroup } from "obsidian";
-import BrumesPlugin from "../BrumesPlugin";
+import NotebookPlugin from "../NotebookPlugin";
 import { ColourScheme, LogLevel, sanitizeAliases } from "./types";
 import {
-	GAME_PACKS,
-	findGamePack,
-	findGameRegistration,
-	resolveGamePack,
-	resolveGameRegistration,
-} from "../games/registry";
-import { resolveGameVariant } from "../games/variants";
-import { OVERRIDE_FILE_NAME } from "../games/overrides";
+	STYLE_PACKS,
+	findStylePack,
+	findPackRegistration,
+	resolveStylePack,
+	resolvePackRegistration,
+} from "../packs/registry";
+import { resolvePackVariant } from "../packs/variants";
+import { OVERRIDE_FILE_NAME } from "../packs/overrides";
 import { log } from "../utils/logger";
 import { CalloutDefinition } from "../features/callouts/types";
 import { isCalloutAvailable } from "../features/callouts/types";
@@ -18,20 +18,20 @@ import { CalloutsModal } from "./calloutsModal";
 import { ThemeContentsModal } from "./themeContentsModal";
 import { SchemaSourceModal, SchemaSourceRemovalModal } from "./sourceModal";
 
-const SETTINGS_SAVE_LOG_MESSAGE = "Failed to save Handbook settings";
-const SETTINGS_SAVE_NOTICE = "Failed to save Handbook settings.";
+const SETTINGS_SAVE_LOG_MESSAGE = "Failed to save Notebook settings";
+const SETTINGS_SAVE_NOTICE = "Failed to save Notebook settings.";
 
-export class BrumesSettingTab extends PluginSettingTab {
-	plugin: BrumesPlugin;
+export class NotebookSettingTab extends PluginSettingTab {
+	plugin: NotebookPlugin;
 
 	// eslint-disable-next-line obsidianmd/prefer-active-doc
-	constructor(app: App, plugin: BrumesPlugin) {
+	constructor(app: App, plugin: NotebookPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
 
 	// Obsidian still invokes this lifecycle method; the replacement API is not
-	// available across Handbook's supported Obsidian range yet.
+	// available across Notebook's supported Obsidian range yet.
 	// eslint-disable-next-line @typescript-eslint/no-deprecated
 	display(): void {
 		const { containerEl } = this;
@@ -40,18 +40,18 @@ export class BrumesSettingTab extends PluginSettingTab {
 		const generalSection = this.createSection(containerEl);
 		generalSection.addSetting((setting) => {
 			setting
-				.setName("Game mode")
+				.setName("Pack mode")
 				.setDesc(
-					"Choose the game line you are preparing for. This updates the main style and the editor context menu.",
+					"Choose the pack line you are preparing for. This updates the main style and the editor context menu.",
 				)
 				.addDropdown((drop) => {
-					if (GAME_PACKS.length === 0) {
-						drop.addOption("none", "No game installed");
+					if (STYLE_PACKS.length === 0) {
+						drop.addOption("none", "No pack installed");
 					}
 					// The list is the registry: a fourth pack shows up here
 					// without a line being written, and its name comes from
 					// the data rather than from a string in the interface.
-					for (const pack of GAME_PACKS) {
+					for (const pack of STYLE_PACKS) {
 						drop.addOption(pack.id, pack.label);
 					}
 
@@ -73,7 +73,7 @@ export class BrumesSettingTab extends PluginSettingTab {
 					);
 				});
 		});
-		this.renderGameVariant(generalSection);
+		this.renderPackVariant(generalSection);
 		this.renderPolarities(generalSection);
 		this.renderThemeContents(generalSection);
 		this.renderPersonalOverrides(generalSection);
@@ -122,16 +122,16 @@ export class BrumesSettingTab extends PluginSettingTab {
 		}
 	}
 
-	private renderGameVariant(section: SettingGroup) {
-		const registration = resolveGameRegistration(this.plugin.settings.mode);
+	private renderPackVariant(section: SettingGroup) {
+		const registration = resolvePackRegistration(this.plugin.settings.mode);
 		const variants = registration.variants ?? [];
 		if (variants.length < 2) {
 			return;
 		}
 
-		const active = resolveGameVariant(
+		const active = resolvePackVariant(
 			registration,
-			this.plugin.settings.gameVariants[registration.pack.id],
+			this.plugin.settings.packVariants[registration.pack.id],
 		);
 		section.addSetting((setting) => {
 			setting
@@ -144,7 +144,7 @@ export class BrumesSettingTab extends PluginSettingTab {
 					drop.setValue(active?.id ?? "").onChange((value) => {
 						this.runTask(
 							async () => {
-								this.plugin.settings.gameVariants[registration.pack.id] =
+								this.plugin.settings.packVariants[registration.pack.id] =
 									value;
 								await this.plugin.saveSettings({ refreshMarkdown: true });
 								// eslint-disable-next-line @typescript-eslint/no-deprecated -- Refreshes the pre-1.13 settings UI.
@@ -160,10 +160,10 @@ export class BrumesSettingTab extends PluginSettingTab {
 
 	/** Only offer a choice when the active appearance provides both schemes. */
 	private renderPolarities(section: SettingGroup) {
-		const registration = resolveGameRegistration(this.plugin.settings.mode);
-		const variant = resolveGameVariant(
+		const registration = resolvePackRegistration(this.plugin.settings.mode);
+		const variant = resolvePackVariant(
 			registration,
-			this.plugin.settings.gameVariants[registration.pack.id],
+			this.plugin.settings.packVariants[registration.pack.id],
 		);
 		const polarities = variant?.polarities ?? registration.pack.polarities ?? [];
 		if (polarities.length < 2) {
@@ -173,7 +173,7 @@ export class BrumesSettingTab extends PluginSettingTab {
 		section.addSetting((setting) => {
 			setting
 				.setName("Colour scheme")
-				.setDesc("The active game has both a light and a dark scheme. Follow Obsidian to keep them aligned, or choose one scheme for the plugin.")
+				.setDesc("The active pack has both a light and a dark scheme. Follow Obsidian to keep them aligned, or choose one scheme for the plugin.")
 				.addDropdown((drop) =>
 					drop
 						.addOption("obsidian", "Follow Obsidian")
@@ -196,15 +196,15 @@ export class BrumesSettingTab extends PluginSettingTab {
 	}
 
 	private renderThemeContents(section: SettingGroup) {
-		const registration = resolveGameRegistration(this.plugin.settings.mode);
-		if (!findGamePack(registration.pack.id)) {
+		const registration = resolvePackRegistration(this.plugin.settings.mode);
+		if (!findStylePack(registration.pack.id)) {
 			return;
 		}
 
 		section.addSetting((setting) => {
 			setting
 				.setName("Theme features")
-				.setDesc("Review the callouts and code blocks declared for the active game.")
+				.setDesc("Review the callouts and code blocks declared for the active pack.")
 				.addButton((button) =>
 					button.setButtonText("View").onClick(() => {
 						new ThemeContentsModal(
@@ -242,7 +242,7 @@ export class BrumesSettingTab extends PluginSettingTab {
 			setting
 				.setName("Workspace theme")
 				.setDesc(
-					"Paint the whole window in the colours of the game, not only the notes. No other game has one yet.",
+					"Paint the whole window in the colours of the pack, not only the notes. No other pack has one yet.",
 				)
 				.addToggle((toggle) =>
 					toggle
@@ -296,7 +296,7 @@ export class BrumesSettingTab extends PluginSettingTab {
 	}
 
 	private renderCalloutsSection(section: SettingGroup) {
-		const required = findGameRegistration(this.plugin.settings.mode)?.installation?.requires ?? [];
+		const required = findPackRegistration(this.plugin.settings.mode)?.installation?.requires ?? [];
 		for (const entry of this.plugin.settings.callouts) {
 			if (!isCalloutAvailable(entry, this.plugin.settings.mode, required)) {
 				continue;
@@ -396,7 +396,7 @@ export class BrumesSettingTab extends PluginSettingTab {
 		if (scope === "all") {
 			return "Tous les jeux";
 		}
-		const pack = GAME_PACKS.find((p) => p.id === scope);
+		const pack = STYLE_PACKS.find((p) => p.id === scope);
 		return pack?.label ?? scope;
 	}
 
@@ -414,11 +414,11 @@ export class BrumesSettingTab extends PluginSettingTab {
 
 	/**
 	 * What replaces the sliders of the preset: a file the user writes, that
-	 * wins over the pack of the active game for the values it declares.
+	 * wins over the pack of the active pack for the values it declares.
 	 */
 	private createOverrideDescription(): DocumentFragment {
 		const fragment = this.containerEl.doc.createDocumentFragment();
-		const pack = resolveGamePack(this.plugin.settings.mode);
+		const pack = resolveStylePack(this.plugin.settings.mode);
 
 		fragment.append("The active pack is ");
 		fragment.createEl("strong", { text: pack.label });
@@ -427,7 +427,7 @@ export class BrumesSettingTab extends PluginSettingTab {
 		);
 		fragment.createEl("code", { text: OVERRIDE_FILE_NAME });
 		fragment.append(
-			", in this plugin's folder in the vault. What the file leaves out keeps the value of the game; removing the file restores it whole.",
+			", in this plugin's folder in the vault. What the file leaves out keeps the value of the pack; removing the file restores it whole.",
 		);
 
 		return fragment;

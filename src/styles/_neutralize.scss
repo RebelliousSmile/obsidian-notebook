@@ -12,11 +12,11 @@
 
 // The root split background has no Obsidian variable of its own — it falls
 // back to the note background. A pack that wants a different paper behind the
-// notes writes `--brumes-root-split-background` in its workspace layer, and
+// notes writes `--notebook-root-split-background` in its workspace layer, and
 // the fallback keeps the default behaviour when it writes nothing.
 .workspace-split.mod-root {
 	background-color: var(
-		--brumes-root-split-background,
+		--notebook-root-split-background,
 		var(--background-primary)
 	);
 }

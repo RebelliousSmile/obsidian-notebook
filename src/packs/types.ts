@@ -1,14 +1,14 @@
 /**
- * The shape of a game pack.
+ * The shape of a pack pack.
  *
- * A pack describes a game as data: who it is, which custom properties it
+ * A pack describes a pack as data: who it is, which custom properties it
  * writes, and where its illustrations live. It never contains CSS: the plugin
  * turns these tokens into one style block, and the SCSS keeps only what a
  * custom property cannot express.
  *
  * These types are the published shape, read the way TypeScript reads it. The
  * contract lives beside the content schemas, in schema-in-the-mist, as
- * `appearance/game-pack.schema.json`; `fromSchema.ts` turns a document of that
+ * `appearance/pack-pack.schema.json`; `fromSchema.ts` turns a document of that
  * shape into the types below. Nothing at runtime reaches for that repository —
  * the schema describes the format, it does not serve it.
  *
@@ -23,24 +23,24 @@
 import type { ShapeOverrides } from "../features/blocks/shape";
 
 /** Custom property name to value, written verbatim into the style block. */
-export type GameStyleTokens = Record<string, string>;
+export type StyleTokens = Record<string, string>;
 
-export interface GameStyleLayer {
+export interface StyleLayer {
 	/** What dresses a note: fonts, colours, heading metrics. */
-	note: GameStyleTokens;
+	note: StyleTokens;
 	/** What repaints the interface around it, behind the workspace toggle. */
-	workspace: GameStyleTokens;
+	workspace: StyleTokens;
 }
 
-export interface GameStyleValues {
+export interface StyleValues {
 	/** Applies whichever theme is active. */
-	base: GameStyleLayer;
-	light: GameStyleLayer;
-	dark: GameStyleLayer;
+	base: StyleLayer;
+	light: StyleLayer;
+	dark: StyleLayer;
 }
 
 /**
- * A polarity a game's own material carries.
+ * A polarity a pack's own material carries.
  *
  * It is a claim about the books, not about Obsidian: a line whose pages are
  * printed white and black sources both, and a line printed on parchment alone
@@ -48,82 +48,82 @@ export interface GameStyleValues {
  * not get it, and the layer it left empty is simply not written.
  *
  * The stylesheet is held to the same claim. A partial may split on a theme
- * only as a compound selector on its own mode class — `.brumes--<game>` and
+ * only as a compound selector on its own mode class — `.notebook--<pack>` and
  * `.theme-dark` sit on the same `body`, so a bare `.theme-dark` would fire for
- * every game, including one that never had a night — and only for a polarity
- * the pack declares. A game that sources one and a stylesheet that draws two
+ * every pack, including one that never had a night — and only for a polarity
+ * the pack declares. A pack that sources one and a stylesheet that draws two
  * disagree about the books, and the stylesheet is the one that is wrong.
  */
-export type GamePolarity = "light" | "dark";
+export type StylePolarity = "light" | "dark";
 
-export const GAME_POLARITIES: GamePolarity[] = ["light", "dark"];
+export const STYLE_POLARITIES: StylePolarity[] = ["light", "dark"];
 
-export function isGamePolarity(value: unknown): value is GamePolarity {
+export function isStylePolarity(value: unknown): value is StylePolarity {
 	return value === "light" || value === "dark";
 }
 
 /**
- * Where the illustrations of a game live in the vault.
+ * Where the illustrations of a pack live in the vault.
  *
  * `root` is a vault path; `images` maps a role a block template asks for —
  * `theme-card-frame`, say — to a file under that root. A role a pack leaves
  * out is not an error: the template that asks for it degrades rather than
  * reserving a box for a picture that never comes.
  */
-export interface GameFontFace {
+export interface StyleFontFace {
 	/** Relative to the pack's asset folder, like an image. */
 	file: string;
 	weight?: string;
 	style?: string;
 }
 
-export interface GameAssets {
+export interface StyleAssets {
 	root?: string;
 	images?: Record<string, string>;
 	/**
 	 * The typefaces the pack asks for, by family name as the tokens spell it,
 	 * to the file that carries the face. Without this, a pack can name a
-	 * family in `--font-text-theme` but nothing loads it, so a new game
-	 * silently borrows whatever face another game's partial happened to
+	 * family in `--font-text-theme` but nothing loads it, so a new pack
+	 * silently borrows whatever face another pack's partial happened to
 	 * emit.
 	 *
 	 * A bare string is the file; the long form exists because a family with a
 	 * single face still has a weight, and a face declared without one is
 	 * matched as regular and then synthetically emboldened.
 	 */
-	fonts?: Record<string, string | GameFontFace>;
+	fonts?: Record<string, string | StyleFontFace>;
 	/** Ordered CSS resources relative to this pack's asset root. */
 	stylesheets?: string[];
 }
 
-export interface GamePack {
-	/** Also the CSS class suffix: `brumes--<id>`. */
+export interface StylePack {
+	/** Also the CSS class suffix: `notebook--<id>`. */
 	id: string;
 	/** Shown in the interface. Comes from the data, never from a literal. */
 	label: string;
-	style: GameStyleValues;
+	style: StyleValues;
 	/**
-	 * The polarities the game's material sources, in the order they are read.
+	 * The polarities the pack's material sources, in the order they are read.
 	 *
 	 * Two of them and the vault's theme decides, on a compound selector. One
 	 * of them and it holds whichever theme is active — the pack declares its
 	 * polarity and sticks to it, rather than degrading to a bare `base` the
-	 * moment someone toggles a theme the game never had. None, and only `base`
+	 * moment someone toggles a theme the pack never had. None, and only `base`
 	 * is written.
 	 *
 	 * Left out on purpose rather than defaulted: a default here would be a
 	 * polarity invented to fill a hole, which is exactly what a reader of the
 	 * rendering could not tell from a sourced one.
 	 */
-	polarities?: GamePolarity[];
-	assets?: GameAssets;
+	polarities?: StylePolarity[];
+	assets?: StyleAssets;
 	/**
-	 * What the game changes about the blocks themselves, block by block and
+	 * What the pack changes about the blocks themselves, block by block and
 	 * zone by zone.
 	 *
 	 * Partial by construction: a pack that says nothing about a zone leaves it
 	 * as the block declares it, and a pack that says nothing at all draws the
-	 * blocks every other game draws. It reaches names, illustrations and
+	 * blocks every other pack draws. It reaches names, illustrations and
 	 * whether a zone is drawn — never geometry, which stays in the SCSS, and
 	 * never the order of the zones, which is the block's.
 	 */
@@ -135,15 +135,15 @@ export interface GamePack {
  * is restricted to what is safe in both: lowercase letters, digits, and single
  * hyphens between them.
  */
-const GAME_PACK_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const STYLE_PACK_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-export function isValidGamePackId(id: unknown): id is string {
-	return typeof id === "string" && GAME_PACK_ID_PATTERN.test(id);
+export function isValidStylePackId(id: unknown): id is string {
+	return typeof id === "string" && STYLE_PACK_ID_PATTERN.test(id);
 }
 
-export const EMPTY_LAYER: GameStyleLayer = { note: {}, workspace: {} };
+export const EMPTY_LAYER: StyleLayer = { note: {}, workspace: {} };
 
-export const EMPTY_STYLE: GameStyleValues = {
+export const EMPTY_STYLE: StyleValues = {
 	base: EMPTY_LAYER,
 	light: EMPTY_LAYER,
 	dark: EMPTY_LAYER,

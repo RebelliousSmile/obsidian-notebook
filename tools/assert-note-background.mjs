@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 const temporaryDirectory = await mkdtemp(
-	join(tmpdir(), "handbook-note-background-"),
+	join(tmpdir(), "notebook-note-background-"),
 );
 const output = join(temporaryDirectory, "assert-note-background.mjs");
 

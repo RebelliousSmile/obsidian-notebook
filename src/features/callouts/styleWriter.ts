@@ -13,10 +13,10 @@ function fontVariable(font: CalloutFontRole): string {
 }
 
 /**
- * One `.callout[data-brumes-callout-style="<styleKey>"]` block per user
+ * One `.callout[data-notebook-callout-style="<styleKey>"]` block per user
  * entry (`native: false`) — a native entry's look stays entirely in
  * `_callouts.scss`. Meant to be appended into the same `<style>` element
- * `applyGameStyle` already owns (`src/features/modes/styleElement.ts`), not
+ * `applyStyle` already owns (`src/features/modes/styleElement.ts`), not
  * a second one.
  */
 export function buildCalloutStyleCss(callouts: CalloutDefinition[]): string {
@@ -35,7 +35,7 @@ export function buildCalloutStyleCss(callouts: CalloutDefinition[]): string {
 			declarations.push("\tbackground-color: var(--background-secondary);");
 		}
 
-		const selector = `.callout[data-brumes-callout-style="${entry.styleKey}"]`;
+		const selector = `.callout[data-notebook-callout-style="${entry.styleKey}"]`;
 		const block = [`${selector} {`, declarations.join("\n"), "}"].join("\n");
 
 		if (entry.template === "body-only") {

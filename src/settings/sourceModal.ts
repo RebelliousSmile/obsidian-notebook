@@ -1,7 +1,7 @@
 import { App, Modal, Notice, Setting } from "obsidian";
-import type BrumesPlugin from "../BrumesPlugin";
-import { isSafeSchemaSourceRepository, schemaSourceId } from "../games/sources";
-import type { SchemaSource, SchemaSourceReference } from "../games/sources";
+import type NotebookPlugin from "../NotebookPlugin";
+import { isSafeSchemaSourceRepository, schemaSourceId } from "../packs/sources";
+import type { SchemaSource, SchemaSourceReference } from "../packs/sources";
 
 export class SchemaSourceModal extends Modal {
 	private repository: string;
@@ -9,7 +9,7 @@ export class SchemaSourceModal extends Modal {
 	private value: string;
 	private errorEl: HTMLElement | null = null;
 	// eslint-disable-next-line obsidianmd/prefer-active-doc
-	constructor(app: App, private readonly plugin: BrumesPlugin, private readonly existing: SchemaSource | null, private readonly saved: () => void) {
+	constructor(app: App, private readonly plugin: NotebookPlugin, private readonly existing: SchemaSource | null, private readonly saved: () => void) {
 		super(app); this.repository = existing?.repository ?? ""; this.kind = existing?.reference.kind ?? "latest"; this.value = existing?.reference.kind === "latest" ? "" : existing?.reference.value ?? "";
 	}
 	onOpen(): void {
@@ -37,7 +37,7 @@ export class SchemaSourceRemovalModal extends Modal {
 	// eslint-disable-next-line obsidianmd/prefer-active-doc
 	constructor(
 		app: App,
-		private readonly plugin: BrumesPlugin,
+		private readonly plugin: NotebookPlugin,
 		private readonly source: SchemaSource,
 		private readonly removed: () => void,
 	) {
@@ -47,7 +47,7 @@ export class SchemaSourceRemovalModal extends Modal {
 	onOpen(): void {
 		this.setTitle("Remove schema source");
 		this.contentEl.createEl("p", {
-			text: `Remove ${this.source.repository} and all of its installed game packs?`,
+			text: `Remove ${this.source.repository} and all of its installed pack packs?`,
 		});
 		new Setting(this.contentEl)
 			.addButton((button) =>

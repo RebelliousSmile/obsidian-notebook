@@ -1,11 +1,11 @@
 // Every typeface the plugin carries, in one place.
 //
-// They used to be pulled in by the game index that happened to need them
-// first, which made a game's typography depend on another game's imports: a
-// pack could ask for faces it never declared, and lose them the day the game
+// They used to be pulled in by the pack index that happened to need them
+// first, which made a pack's typography depend on another pack's imports: a
+// pack could ask for faces it never declared, and lose them the day the pack
 // that happened to load them first stopped using them. `@font-face` is
 // global to the document anyway, so the honest shape is a single list the
-// whole stylesheet loads, whichever game is on.
+// whole stylesheet loads, whichever pack is on.
 //
 // A pack that wants a face the plugin does not carry declares it in its
 // `assets.fonts`, and the plugin loads it from the vault at runtime. One

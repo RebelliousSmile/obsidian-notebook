@@ -3,10 +3,10 @@
 // Since the packs own the rendering, a colour has two homes and only one of
 // them is right for any given value.
 //
-// It belongs to the pack (built-in `src/games/<game>.ts`, or an external
-// `pack.json`) when it is part of the game's scheme — the paper, the ink, the
+// It belongs to the pack (built-in `src/packs/<pack>.ts`, or an external
+// `pack.json`) when it is part of the pack's scheme — the paper, the ink, the
 // accent, the palette and asset roles — because that is what
-// changes between two games and between two polarities, and what a reader may
+// changes between two packs and between two polarities, and what a reader may
 // override in `overrides.json`.
 //
 // It belongs here when it is none of those: a tint keyed by a vocabulary

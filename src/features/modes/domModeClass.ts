@@ -1,16 +1,16 @@
-import { missingAssetClass } from "../../games/assets";
+import { missingAssetClass } from "../../packs/assets";
 import {
-	gamePackClass,
-	gamePackClasses,
-	gameVariantClasses,
-} from "../../games/registry";
-import { gameVariantClass } from "../../games/variants";
-import { BrumesMode, ColourScheme } from "../../settings/types";
+	stylePackClass,
+	stylePackClasses,
+	packVariantClasses,
+} from "../../packs/registry";
+import { packVariantClass } from "../../packs/variants";
+import { StylePackId, ColourScheme } from "../../settings/types";
 
-export const WORKSPACE_THEME_CLASS = "brumes--workspace-theme";
-export const BLOCK_SCOPE_CLASS = "brumes-block-scope";
-export const COLOUR_SCHEME_LIGHT_CLASS = "brumes--colour-light";
-export const COLOUR_SCHEME_DARK_CLASS = "brumes--colour-dark";
+export const WORKSPACE_THEME_CLASS = "notebook--workspace-theme";
+export const BLOCK_SCOPE_CLASS = "notebook-block-scope";
+export const COLOUR_SCHEME_LIGHT_CLASS = "notebook--colour-light";
+export const COLOUR_SCHEME_DARK_CLASS = "notebook--colour-dark";
 const MISSING_ASSET_PREFIX = missingAssetClass("");
 
 /**
@@ -19,34 +19,34 @@ const MISSING_ASSET_PREFIX = missingAssetClass("");
  * of them: the style the plugin writes is scoped by that class, so a body
  * without it stays undressed.
  */
-export function setBrumesModeClass(mode: BrumesMode, doc: Document) {
+export function setNotebookModeClass(mode: StylePackId, doc: Document) {
 	const body = doc.body;
 
 	// Remove existing mode classes
-	for (const cls of gamePackClasses()) {
+	for (const cls of stylePackClasses()) {
 		body.classList.remove(cls);
 	}
 
 	// Add the new class
-	body.classList.add(gamePackClass(mode));
+	body.classList.add(stylePackClass(mode));
 }
 
-export function setBrumesVariantClass(variantId: string | null, doc: Document) {
+export function setNotebookVariantClass(variantId: string | null, doc: Document) {
 	const body = doc.body;
-	for (const cls of gameVariantClasses()) {
+	for (const cls of packVariantClasses()) {
 		body.classList.remove(cls);
 	}
 	if (variantId) {
-		body.classList.add(gameVariantClass(variantId));
+		body.classList.add(packVariantClass(variantId));
 	}
 }
 
 /**
- * Repainting the whole workspace in the colours of the game is a choice of
+ * Repainting the whole workspace in the colours of the pack is a choice of
  * its own: the mode styles the notes, this class styles everything around
  * them.
  */
-export function setBrumesWorkspaceThemeClass(enabled: boolean, doc: Document) {
+export function setNotebookWorkspaceThemeClass(enabled: boolean, doc: Document) {
 	const body = doc.body;
 
 	if (enabled) {
@@ -57,8 +57,8 @@ export function setBrumesWorkspaceThemeClass(enabled: boolean, doc: Document) {
 	body.classList.remove(WORKSPACE_THEME_CLASS);
 }
 
-/** Apply a Handbook-only polarity without changing Obsidian's own theme. */
-export function setBrumesColourSchemeClass(
+/** Apply a Notebook-only polarity without changing Obsidian's own theme. */
+export function setNotebookColourSchemeClass(
 	colourScheme: ColourScheme,
 	doc: Document,
 ) {
@@ -78,7 +78,7 @@ export function setBrumesColourSchemeClass(
  * is rarely enough on its own: a card without its frame needs a flat ground
  * and a border to still read as a card.
  */
-export function setBrumesMissingAssetClasses(roles: string[], doc: Document) {
+export function setNotebookMissingAssetClasses(roles: string[], doc: Document) {
 	const body = doc.body;
 	const stale: string[] = [];
 
@@ -99,17 +99,17 @@ export function setBrumesMissingAssetClasses(roles: string[], doc: Document) {
 }
 
 /** Leave a document as the plugin found it. */
-export function clearBrumesModeClasses(doc: Document) {
+export function clearNotebookModeClasses(doc: Document) {
 	const body = doc.body;
 
-	for (const cls of gamePackClasses()) {
+	for (const cls of stylePackClasses()) {
 		body.classList.remove(cls);
 	}
-	for (const cls of gameVariantClasses()) {
+	for (const cls of packVariantClasses()) {
 		body.classList.remove(cls);
 	}
 
 	body.classList.remove(WORKSPACE_THEME_CLASS);
 	body.classList.remove(COLOUR_SCHEME_LIGHT_CLASS, COLOUR_SCHEME_DARK_CLASS);
-	setBrumesMissingAssetClasses([], doc);
+	setNotebookMissingAssetClasses([], doc);
 }

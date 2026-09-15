@@ -1,7 +1,7 @@
-import { isValidGamePackId } from "../../games/types";
+import { isValidStylePackId } from "../../packs/types";
 
 /**
- * A callout can follow every game or any syntactically safe game plugin id.
+ * A callout can follow every pack or any syntactically safe pack plugin id.
  * The id need not currently be installed: keeping it lets a user's callout
  * configuration become active again after the plugin directory comes back.
  */
@@ -42,7 +42,7 @@ export const CALLOUT_FONT_ROLES: CalloutFontRole[] = ["header", "text"];
 export const CALLOUT_TEMPLATES: CalloutTemplate[] = ["title-body", "body-only"];
 
 export function isCalloutScope(value: unknown): value is CalloutScope {
-	return value === "all" || isValidGamePackId(value);
+	return value === "all" || isValidStylePackId(value);
 }
 
 export function isCalloutFontRole(value: unknown): value is CalloutFontRole {

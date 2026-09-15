@@ -7,11 +7,7 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const packageJson = JSON.parse(
 	readFileSync(resolve(root, "package.json"), "utf8"),
 );
-const externalSchemaAssertions = new Set([
-	"assert:adrenaline-source",
-	"assert:adrenaline-theme",
-	"assert:adrenaline-zombiology-style",
-]);
+const externalSchemaAssertions = new Set();
 const commands = [
 	"build",
 	"lint",
@@ -55,4 +51,4 @@ for (const command of commands) {
 	}
 }
 
-console.log("\nHandbook core check passed.");
+console.log("\nNotebook core check passed.");

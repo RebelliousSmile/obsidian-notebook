@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 ---
 
 # Instruction: Renommage Brumes→Notebook / Game→Pack

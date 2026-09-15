@@ -1,27 +1,27 @@
 import type {
-	BrumesFeatureSettings,
-	BrumesMode,
-	BrumesSettings,
+	NotebookFeatureSettings,
+	StylePackId,
+	NotebookSettings,
 } from "../../settings/types";
 import type { BlockShape } from "./shape";
 
 /**
- * Everything a fenced Brumes block needs: how it is written, when it is
+ * Everything a fenced Notebook block needs: how it is written, when it is
  * active, how it is parsed, how it is rendered, and how it is inserted.
  */
-export interface BrumesBlock<T> {
+export interface NotebookBlock<T> {
 	/** The code block language, e.g. `theme-card`. */
 	id: string;
 	/** Older ids kept working after a rename. */
 	aliases?: string[];
-	/** Historical single-game activation. Shared blocks use `capability` instead. */
-	mode?: BrumesMode;
+	/** Historical single-pack activation. Shared blocks use `capability` instead. */
+	mode?: StylePackId;
 	/** Installed-pack capability which activates a shared block. */
 	capability?: `block:${string}`;
 	/** True when this block is also a complete printable handout. */
 	handout?: boolean;
-	/** Optional user-facing feature flag. Blocks without one follow their game. */
-	flag?: keyof BrumesFeatureSettings;
+	/** Optional user-facing feature flag. Blocks without one follow their pack. */
+	flag?: keyof NotebookFeatureSettings;
 	/** Context menu entry title. */
 	label: string;
 	/** Context menu entry icon. */
@@ -30,7 +30,7 @@ export interface BrumesBlock<T> {
 	 * The named zones the block is made of, in the order they are drawn.
 	 *
 	 * Required rather than optional, and deliberately so: a block that ships
-	 * without a shape is a block nothing but Handbook can draw. The shape
+	 * without a shape is a block nothing but Notebook can draw. The shape
 	 * describes what the renderer already does — it is a description, not a
 	 * layout the renderer is asked to obey.
 	 */
@@ -41,8 +41,8 @@ export interface BrumesBlock<T> {
 }
 
 export function isBlockEnabled(
-	block: BrumesBlock<unknown>,
-	settings: BrumesSettings,
+	block: NotebookBlock<unknown>,
+	settings: NotebookSettings,
 	requiredCapabilities: readonly string[] = [],
 ): boolean {
 	const active = block.capability
@@ -52,6 +52,6 @@ export function isBlockEnabled(
 }
 
 /** The block id followed by every alias it answers to. */
-export function blockIds(block: BrumesBlock<unknown>): string[] {
+export function blockIds(block: NotebookBlock<unknown>): string[] {
 	return [block.id, ...(block.aliases ?? [])];
 }

@@ -1,5 +1,5 @@
 import { Editor, EventRef, Menu } from "obsidian";
-import type BrumesPlugin from "../BrumesPlugin";
+import type NotebookPlugin from "../NotebookPlugin";
 import {
 	contributeBlockInsertions,
 	hasBlockInsertions,
@@ -8,9 +8,9 @@ import {
 	contributeCalloutInsertions,
 	getAvailableCalloutInsertions,
 } from "../features/callouts/contextMenu";
-import { getOrCreateBrumesSubmenu } from "../utils/contextSubMenu";
+import { getOrCreateNotebookSubmenu } from "../utils/contextSubMenu";
 
-export function registerBrumesContextMenu(plugin: BrumesPlugin): EventRef {
+export function registerNotebookContextMenu(plugin: NotebookPlugin): EventRef {
 	return plugin.app.workspace.on(
 		"editor-menu",
 		(menu: Menu, editor: Editor) => {
@@ -23,7 +23,7 @@ export function registerBrumesContextMenu(plugin: BrumesPlugin): EventRef {
 				return;
 			}
 
-			const submenu = getOrCreateBrumesSubmenu(menu);
+			const submenu = getOrCreateNotebookSubmenu(menu);
 			let hasItems = false;
 
 			const calloutItems = contributeCalloutInsertions(

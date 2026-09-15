@@ -1,10 +1,10 @@
-import { BrumesMode, ColourScheme } from "../../settings/types";
+import { StylePackId, ColourScheme } from "../../settings/types";
 import {
-	GamePolarity,
-	GameStyleLayer,
-	GameStyleTokens,
-	GameStyleValues,
-} from "../../games/types";
+	StylePolarity,
+	StyleLayer,
+	StyleTokens,
+	StyleValues,
+} from "../../packs/types";
 import {
 	BLOCK_SCOPE_CLASS,
 	COLOUR_SCHEME_DARK_CLASS,
@@ -12,8 +12,8 @@ import {
 	WORKSPACE_THEME_CLASS,
 } from "./domModeClass";
 
-const STYLE_ELEMENT_ID = "brumes-game-style";
-const PACK_STYLE_ELEMENT_ID = "brumes-pack-style";
+const STYLE_ELEMENT_ID = "notebook-style";
+const PACK_STYLE_ELEMENT_ID = "notebook-pack-style";
 
 /**
  * A value never legitimately closes a declaration or a block. Dropping those
@@ -24,7 +24,7 @@ function sanitizeValue(value: string): string {
 	return value.replace(/[{};<>]/g, "").trim();
 }
 
-function renderTokens(tokens: GameStyleTokens, indent: string): string {
+function renderTokens(tokens: StyleTokens, indent: string): string {
 	const lines: string[] = [];
 
 	for (const name of Object.keys(tokens)) {
@@ -39,7 +39,7 @@ function renderTokens(tokens: GameStyleTokens, indent: string): string {
 	return lines.join("\n");
 }
 
-function renderTokenBlock(selector: string, tokens: GameStyleTokens): string {
+function renderTokenBlock(selector: string, tokens: StyleTokens): string {
 	const declarations = renderTokens(tokens, "\t");
 
 	if (!declarations) {
@@ -52,7 +52,7 @@ function renderTokenBlock(selector: string, tokens: GameStyleTokens): string {
 function renderLayer(
 	noteSelector: string,
 	workspaceSelector: string,
-	layer: GameStyleLayer,
+	layer: StyleLayer,
 	withWorkspace: boolean,
 ): string {
 	const blocks = [renderTokenBlock(noteSelector, layer.note)];
@@ -65,7 +65,7 @@ function renderLayer(
 }
 
 function polarityClass(
-	polarity: GamePolarity,
+	polarity: StylePolarity,
 	colourScheme: ColourScheme,
 ): string {
 	if (colourScheme === polarity) {
@@ -80,11 +80,11 @@ function polarityClass(
 }
 
 function noteSelector(
-	mode: BrumesMode,
-	polarity?: GamePolarity,
+	mode: StylePackId,
+	polarity?: StylePolarity,
 	colourScheme: ColourScheme = "obsidian",
 ): string {
-	const modeClass = `brumes--${mode}`;
+	const modeClass = `notebook--${mode}`;
 	const themeClass = polarity
 		? polarityClass(polarity, colourScheme)
 		: "";
@@ -108,20 +108,20 @@ function noteSelector(
 }
 
 function workspaceSelector(
-	mode: BrumesMode,
-	polarity?: GamePolarity,
+	mode: StylePackId,
+	polarity?: StylePolarity,
 	colourScheme: ColourScheme = "obsidian",
 ): string {
 	const themeClass = polarity
 		? polarityClass(polarity, colourScheme)
 		: "";
-	return `body.brumes--${mode}.${WORKSPACE_THEME_CLASS}${themeClass}`;
+	return `body.notebook--${mode}.${WORKSPACE_THEME_CLASS}${themeClass}`;
 }
 
 /**
- * Build the whole style of a game as one block.
+ * Build the whole style of a pack as one block.
  *
- * The variants are written as compound selectors — `.brumes--<mode>.theme-dark`
+ * The variants are written as compound selectors — `.notebook--<mode>.theme-dark`
  * and not `.theme-dark` alone. Both classes sit on the same `body`: at equal
  * specificity only source order would decide, and nothing guarantees our
  * sheet comes after the active theme's.
@@ -131,7 +131,7 @@ function workspaceSelector(
  *
  * - two polarities and the vault's theme picks, on those compound selectors;
  * - one, and it is written on the bare mode selector, after `base` and so
- *   above it — the game holds its own register whichever theme is active,
+ *   above it — the pack holds its own register whichever theme is active,
  *   rather than losing its colours the moment someone toggles a scheme it
  *   never had;
  * - none, and `base` is all there is. A layer the pack did not declare is not
@@ -139,15 +139,15 @@ function workspaceSelector(
  *
  * Note declarations land on Markdown views and on the local scope attached to
  * rendered blocks. Workspace declarations land on `body` only while the
- * workspace toggle class is present. This keeps a game's paper and ink inside
+ * workspace toggle class is present. This keeps a pack's paper and ink inside
  * notes without starving code-block widgets whose document missed the body
  * mode class during an Obsidian live-preview refresh.
  */
-export function buildGameStyle(
-	mode: BrumesMode,
-	values: GameStyleValues,
+export function buildStyle(
+	mode: StylePackId,
+	values: StyleValues,
 	workspaceTheme: boolean,
-	polarities: GamePolarity[] = [],
+	polarities: StylePolarity[] = [],
 	colourScheme: ColourScheme = "obsidian",
 ): string {
 	const blocks = [
@@ -203,7 +203,7 @@ export function buildGameStyle(
  * main document would leave a popped-out note undressed, so every document is
  * tracked and written to.
  */
-export class GameStyleWriter {
+export class StyleWriter {
 	private css = "";
 	private packCss = "";
 	private readonly documents: Document[] = [];
@@ -224,10 +224,10 @@ export class GameStyleWriter {
 		}
 
 		this.documents.splice(index, 1);
-		removeGameStyle(doc);
+		clearStyleElements(doc);
 	}
 
-	applyGameStyle(css: string) {
+	applyStyle(css: string) {
 		this.css = css;
 
 		for (const doc of this.documents) {
@@ -241,9 +241,9 @@ export class GameStyleWriter {
 	}
 
 	/** Leave nothing behind when the plugin unloads. */
-	removeGameStyle() {
+	removeStyle() {
 		for (const doc of this.documents) {
-			removeGameStyle(doc);
+			clearStyleElements(doc);
 		}
 
 		this.documents.length = 0;
@@ -253,7 +253,7 @@ export class GameStyleWriter {
 
 	private writeTo(doc: Document) {
 		if (!this.css) {
-			removeGameStyle(doc);
+			clearStyleElements(doc);
 			return;
 		}
 
@@ -302,7 +302,7 @@ function ensurePackStyleElement(doc: Document): HTMLStyleElement {
 	return element;
 }
 
-export function removeGameStyle(doc: Document) {
+export function clearStyleElements(doc: Document) {
 	doc.getElementById(STYLE_ELEMENT_ID)?.remove();
 	doc.getElementById(PACK_STYLE_ELEMENT_ID)?.remove();
 }

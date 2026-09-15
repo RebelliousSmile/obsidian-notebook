@@ -1,4 +1,4 @@
-import { isValidGamePackId } from "./types";
+import { isValidStylePackId } from "./types";
 
 export const SCHEMA_REPOSITORY_MANIFEST_VERSION = 1;
 
@@ -54,7 +54,7 @@ function readPack(value: unknown, _index: number): SchemaRepositoryPackEntry | n
 	const id = text(value.id);
 	const version = text(value.version);
 	const path = text(value.path);
-	if (!id || !isValidGamePackId(id) || !version || !SEMVER_PATTERN.test(version) || !path || !isSafeRepositoryPath(path)) {
+	if (!id || !isValidStylePackId(id) || !version || !SEMVER_PATTERN.test(version) || !path || !isSafeRepositoryPath(path)) {
 		return null;
 	}
 	const entry: SchemaRepositoryPackEntry = { id, version, path };

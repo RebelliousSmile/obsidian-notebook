@@ -1,4 +1,4 @@
-import { installStarterKitSources, readStarterKitCatalog, STARTER_KITS } from "../src/games/starterKits";
+import { installStarterKitSources, readStarterKitCatalog, STARTER_KITS } from "../src/packs/starterKits";
 
 if (STARTER_KITS.length !== 0) throw new Error("shipped catalogue should expose no starter kits");
 

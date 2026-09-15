@@ -25,7 +25,7 @@ class Logger {
 	private context: string;
 
 	// eslint-disable-next-line obsidianmd/prefer-active-doc
-	constructor(context = "Handbook") {
+	constructor(context = "Notebook") {
 		this.context = context;
 	}
 
@@ -89,5 +89,5 @@ export const log = new Logger();
 
 // Scoped loggers — share global log level, only change context
 export function logScope(name: string): Logger {
-	return new Logger(`Brumes:${name}`);
+	return new Logger(`Notebook:${name}`);
 }

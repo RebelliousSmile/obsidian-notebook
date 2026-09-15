@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawnSync } from "node:child_process";
 
-const work = mkdtempSync(join(tmpdir(), "handbook-style-scope-"));
+const work = mkdtempSync(join(tmpdir(), "notebook-style-scope-"));
 const stub = join(work, "obsidian-stub.mjs");
 const bundle = join(work, "harness.cjs");
 

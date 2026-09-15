@@ -1,15 +1,15 @@
-import { readGamePack } from "./fromSchema";
-import { gamePluginCapabilityIssues } from "./capabilities";
-import { GamePack, GamePolarity } from "./types";
-import { GameVariant } from "./variants";
+import { readStylePack } from "./fromSchema";
+import { packPluginCapabilityIssues } from "./capabilities";
+import { StylePack, StylePolarity } from "./types";
+import { PackVariant } from "./variants";
 import type { InstalledSchemaSource } from "./sources";
 
-export const GAME_PLUGIN_MANIFEST_VERSION = 1;
+export const PACK_PLUGIN_MANIFEST_VERSION = 1;
 
 const MANIFEST_FIELDS = [
 	"manifestVersion",
 	"version",
-	"minimumHandbookVersion",
+	"minimumNotebookVersion",
 	"requires",
 	"variants",
 	"defaultVariantId",
@@ -19,33 +19,33 @@ const CAPABILITY_PATTERN = /^(?:block|style):[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const SEMVER_PATTERN =
 	/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/;
 
-export interface GamePluginManifest {
+export interface PackPluginManifest {
 	manifestVersion: number;
 	version: string;
-	minimumHandbookVersion: string;
+	minimumNotebookVersion: string;
 	requires: string[];
-	variants?: GameVariant[];
+	variants?: PackVariant[];
 	defaultVariantId?: string;
-	pack: GamePack;
+	pack: StylePack;
 }
 
-export interface GamePluginInstallation {
+export interface PackPluginInstallation {
 	root: string;
 	version: string;
-	minimumHandbookVersion: string;
+	minimumNotebookVersion: string;
 	requires: string[];
-	variants?: GameVariant[];
+	variants?: PackVariant[];
 	defaultVariantId?: string;
 	source?: InstalledSchemaSource;
 }
 
-export interface InstalledGamePlugin {
-	pack: GamePack;
-	installation?: GamePluginInstallation;
+export interface InstalledPackPlugin {
+	pack: StylePack;
+	installation?: PackPluginInstallation;
 }
 
-export type GamePluginManifestResult =
-	| { manifest: GamePluginManifest; error?: never }
+export type PackPluginManifestResult =
+	| { manifest: PackPluginManifest; error?: never }
 	| { manifest?: never; error: string };
 
 interface SemVer {
@@ -149,32 +149,32 @@ function readRequirements(value: unknown): string[] | null {
 	return requirements;
 }
 
-function readVariants(value: unknown): { variants?: GameVariant[]; defaultVariantId?: string } | null {
+function readVariants(value: unknown): { variants?: PackVariant[]; defaultVariantId?: string } | null {
 	if (value === undefined) return {};
 	if (!Array.isArray(value)) return null;
-	const variants: GameVariant[] = [];
+	const variants: PackVariant[] = [];
 	for (const candidate of value) {
 		if (!isRecord(candidate) || Object.keys(candidate).some((field) => !["id", "label", "style", "polarities"].includes(field))) return null;
 		const id = typeof candidate.id === "string" ? candidate.id : "";
 		const label = typeof candidate.label === "string" ? candidate.label.trim() : "";
 		if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(id) || !label || variants.some((variant) => variant.id === id)) return null;
-		const variantPack = readGamePack({ id, label, style: candidate.style });
+		const variantPack = readStylePack({ id, label, style: candidate.style });
 		const polarities = candidate.polarities;
 		if (!variantPack || !Array.isArray(polarities) || polarities.length === 0 || polarities.some((value) => value !== "light" && value !== "dark") || new Set(polarities).size !== polarities.length) return null;
-		variants.push({ id, label, style: variantPack.style, polarities: polarities as GamePolarity[] });
+		variants.push({ id, label, style: variantPack.style, polarities: polarities as StylePolarity[] });
 	}
 	return { variants };
 }
 
 /**
  * Read the strict installation envelope around the deliberately tolerant
- * GamePack document. An incompatible plugin is rejected whole before it can
+ * StylePack document. An incompatible plugin is rejected whole before it can
  * enter the registry.
  */
-export function readGamePluginManifest(
+export function readPackPluginManifest(
 	source: unknown,
-	handbookVersion: string,
-): GamePluginManifestResult {
+	notebookVersion: string,
+): PackPluginManifestResult {
 	if (!isRecord(source)) {
 		return { error: "the manifest is not an object" };
 	}
@@ -186,7 +186,7 @@ export function readGamePluginManifest(
 		return { error: `unknown manifest fields: ${unknown.join(", ")}` };
 	}
 
-	if (source.manifestVersion !== GAME_PLUGIN_MANIFEST_VERSION) {
+	if (source.manifestVersion !== PACK_PLUGIN_MANIFEST_VERSION) {
 		return {
 			error: `manifest version ${String(source.manifestVersion)} is not supported`,
 		};
@@ -197,18 +197,18 @@ export function readGamePluginManifest(
 		return { error: `"version" is not valid SemVer` };
 	}
 
-	const minimum = parseSemVer(source.minimumHandbookVersion);
+	const minimum = parseSemVer(source.minimumNotebookVersion);
 	if (!minimum) {
-		return { error: `"minimumHandbookVersion" is not valid SemVer` };
+		return { error: `"minimumNotebookVersion" is not valid SemVer` };
 	}
 
-	const host = parseSemVer(handbookVersion);
+	const host = parseSemVer(notebookVersion);
 	if (!host) {
-		return { error: `Handbook version "${handbookVersion}" is not valid SemVer` };
+		return { error: `Notebook version "${notebookVersion}" is not valid SemVer` };
 	}
 	if (compareSemVer(host, minimum) < 0) {
 		return {
-			error: `requires Handbook ${String(source.minimumHandbookVersion)} or newer (installed: ${handbookVersion})`,
+			error: `requires Notebook ${String(source.minimumNotebookVersion)} or newer (installed: ${notebookVersion})`,
 		};
 	}
 
@@ -226,28 +226,28 @@ export function readGamePluginManifest(
 		defaultVariantId = source.defaultVariantId;
 	}
 
-	const pack = readGamePack(source.pack);
+	const pack = readStylePack(source.pack);
 	if (!pack) {
-		return { error: `"pack" is not a usable game pack` };
+		return { error: `"pack" is not a usable pack pack` };
 	}
 
-	const issues = gamePluginCapabilityIssues(pack.id, requires);
+	const issues = packPluginCapabilityIssues(pack.id, requires);
 	if (issues.unknown.length > 0) {
 		return {
-			error: `unknown Handbook capabilities: ${issues.unknown.join(", ")}`,
+			error: `unknown Notebook capabilities: ${issues.unknown.join(", ")}`,
 		};
 	}
 	if (issues.foreign.length > 0) {
 		return {
-			error: `Handbook does not provide these capabilities for "${pack.id}": ${issues.foreign.join(", ")}`,
+			error: `Notebook does not provide these capabilities for "${pack.id}": ${issues.foreign.join(", ")}`,
 		};
 	}
 
 	return {
 		manifest: {
-			manifestVersion: GAME_PLUGIN_MANIFEST_VERSION,
+			manifestVersion: PACK_PLUGIN_MANIFEST_VERSION,
 			version: String(source.version),
-			minimumHandbookVersion: String(source.minimumHandbookVersion),
+			minimumNotebookVersion: String(source.minimumNotebookVersion),
 			requires,
 			variants: variantResult.variants,
 			defaultVariantId,

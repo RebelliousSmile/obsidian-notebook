@@ -5,7 +5,7 @@ import { sassPlugin } from "esbuild-sass-plugin";
 import fs from "fs";
 import path from "path";
 
-const banner = `/* Handbook, game-specific themes and tools for Obsidian tabletop roleplaying vaults. */`;
+const banner = `/* Notebook, style packs and tools for Obsidian vaults. */`;
 const outdir = "dist";
 const prod =
 	process.argv.includes("production") ||

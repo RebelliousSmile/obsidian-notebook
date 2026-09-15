@@ -1,7 +1,7 @@
 import { App, MarkdownView, TFile } from "obsidian";
 import { parseNoteBackground } from "./noteBackgroundProperties";
 
-export const NOTE_BACKGROUND_CLASS = "brumes-note-background";
+export const NOTE_BACKGROUND_CLASS = "notebook-note-background";
 
 const IMAGE_EXTENSIONS = new Set([
 	"avif",
@@ -14,7 +14,7 @@ const IMAGE_EXTENSIONS = new Set([
 	"webp",
 ]);
 
-/** Apply a vault-local background to one Markdown leaf, or restore its game. */
+/** Apply a vault-local background to one Markdown leaf, or restore its pack. */
 export function refreshNoteBackground(app: App, view: MarkdownView) {
 	clearNoteBackground(view);
 
@@ -40,16 +40,16 @@ export function refreshNoteBackground(app: App, view: MarkdownView) {
 
 	const style = view.containerEl.style;
 	style.setProperty(
-		"--brumes-note-background-image",
+		"--notebook-note-background-image",
 		`url(${JSON.stringify(app.vault.getResourcePath(image))})`,
 	);
 	style.setProperty(
-		"--brumes-note-background-position",
+		"--notebook-note-background-position",
 		properties.position,
 	);
-	style.setProperty("--brumes-note-background-size", properties.size);
-	style.setProperty("--brumes-note-background-repeat", properties.repeat);
-	style.setProperty("--brumes-note-background-opacity", properties.opacity);
+	style.setProperty("--notebook-note-background-size", properties.size);
+	style.setProperty("--notebook-note-background-repeat", properties.repeat);
+	style.setProperty("--notebook-note-background-opacity", properties.opacity);
 	view.containerEl.classList.add(NOTE_BACKGROUND_CLASS);
 }
 
@@ -57,11 +57,11 @@ export function clearNoteBackground(view: MarkdownView) {
 	view.containerEl.classList.remove(NOTE_BACKGROUND_CLASS);
 
 	for (const property of [
-		"--brumes-note-background-image",
-		"--brumes-note-background-position",
-		"--brumes-note-background-size",
-		"--brumes-note-background-repeat",
-		"--brumes-note-background-opacity",
+		"--notebook-note-background-image",
+		"--notebook-note-background-position",
+		"--notebook-note-background-size",
+		"--notebook-note-background-repeat",
+		"--notebook-note-background-opacity",
 	]) {
 		view.containerEl.style.removeProperty(property);
 	}

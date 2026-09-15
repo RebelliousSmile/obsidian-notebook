@@ -1,17 +1,17 @@
-import type BrumesPlugin from "../../BrumesPlugin";
-import { BrumesSettings } from "../../settings/types";
+import type NotebookPlugin from "../../NotebookPlugin";
+import { NotebookSettings } from "../../settings/types";
 import { logScope } from "../../utils/logger";
-import { findGameRegistration } from "../../games/registry";
+import { findPackRegistration } from "../../packs/registry";
 import { isCalloutAvailable } from "./types";
 
-const BRUMES_CALLOUT_STYLE_ATTR = "data-brumes-callout-style";
+const NOTEBOOK_CALLOUT_STYLE_ATTR = "data-notebook-callout-style";
 
 const calloutsLog = logScope("Callouts");
 
 /** Inter-scope alias collisions already reported, so each warns once per session. */
 const warnedAliasCollisions = new Set<string>();
 
-export function loadCalloutAliasFeature(plugin: BrumesPlugin): () => void {
+export function loadCalloutAliasFeature(plugin: NotebookPlugin): () => void {
 	const workspaceBody = plugin.app.workspace.containerEl.doc.body;
 	const syncAliases = () =>
 		syncCalloutAliases(workspaceBody, plugin.settings, plugin.settings.mode);
@@ -48,7 +48,7 @@ export function loadCalloutAliasFeature(plugin: BrumesPlugin): () => void {
 
 function syncCalloutAliases(
 	root: ParentNode & Node,
-	settings: BrumesSettings,
+	settings: NotebookSettings,
 	activePackId: string,
 ) {
 	const aliasMap = buildAliasMap(settings, activePackId);
@@ -62,11 +62,11 @@ function syncCalloutAliases(
 		const canonicalCallout = aliasMap.get(currentCallout.toLowerCase());
 
 		if (canonicalCallout) {
-			calloutEl.setAttribute(BRUMES_CALLOUT_STYLE_ATTR, canonicalCallout);
+			calloutEl.setAttribute(NOTEBOOK_CALLOUT_STYLE_ATTR, canonicalCallout);
 			continue;
 		}
 
-		calloutEl.removeAttribute(BRUMES_CALLOUT_STYLE_ATTR);
+		calloutEl.removeAttribute(NOTEBOOK_CALLOUT_STYLE_ATTR);
 	}
 }
 
@@ -97,9 +97,9 @@ function getCalloutElements(root: ParentNode & Node): HTMLElement[] {
  * duplicate that slips through anyway keeps the first entry in list order
  * and warns once per session rather than silently overwriting it.
  */
-function buildAliasMap(settings: BrumesSettings, activePackId: string): Map<string, string> {
+function buildAliasMap(settings: NotebookSettings, activePackId: string): Map<string, string> {
 	const aliasMap = new Map<string, string>();
-	const required = findGameRegistration(activePackId)?.installation?.requires ?? [];
+	const required = findPackRegistration(activePackId)?.installation?.requires ?? [];
 
 	for (const entry of settings.callouts) {
 		if (!isCalloutAvailable(entry, activePackId, required)) {
@@ -112,7 +112,7 @@ function buildAliasMap(settings: BrumesSettings, activePackId: string): Map<stri
 				if (!warnedAliasCollisions.has(key)) {
 					warnedAliasCollisions.add(key);
 					calloutsLog.warn(
-						`Alias "${alias}" is claimed by more than one callout visible in this game; keeping the first one declared.`,
+						`Alias "${alias}" is claimed by more than one callout visible in this pack; keeping the first one declared.`,
 					);
 				}
 				continue;

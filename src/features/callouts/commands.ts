@@ -1,17 +1,17 @@
 import { Editor } from "obsidian";
-import type BrumesPlugin from "../../BrumesPlugin";
-import { GAME_PACKS } from "../../games/registry";
+import type NotebookPlugin from "../../NotebookPlugin";
+import { STYLE_PACKS } from "../../packs/registry";
 import { insertCallout } from "./contextMenu";
 import { CalloutDefinition } from "./types";
 import { isCalloutAvailable } from "./types";
-import { findGameRegistration } from "../../games/registry";
+import { findPackRegistration } from "../../packs/registry";
 
 function commandId(entry: CalloutDefinition): string {
 	return `callout-insert-${entry.id}`;
 }
 
 /**
- * The callout's own name, suffixed by the game whenever its scope is not
+ * The callout's own name, suffixed by the pack whenever its scope is not
  * "all" — deterministic, not only on a collision, so the two native "Note"
  * entries (City of Mist, Legend in the Mist) read apart in the command
  * palette and the Hotkeys panel.
@@ -21,7 +21,7 @@ export function calloutCommandName(entry: CalloutDefinition): string {
 		return entry.name;
 	}
 
-	const pack = GAME_PACKS.find((p) => p.id === entry.scope);
+	const pack = STYLE_PACKS.find((p) => p.id === entry.scope);
 	return `${entry.name} (${pack?.label ?? entry.scope})`;
 }
 
@@ -40,7 +40,7 @@ const registered = new Map<string, RegisteredCommand>();
  * left alone.
  */
 export function syncCalloutCommands(
-	plugin: BrumesPlugin,
+	plugin: NotebookPlugin,
 	callouts: CalloutDefinition[],
 ): void {
 	const current = new Map<string, CalloutDefinition>();
@@ -79,7 +79,7 @@ export function syncCalloutCommands(
  * so an alias or template edited without a name/scope change (which would
  * not otherwise re-register the command) still inserts current data.
  */
-function registerCalloutCommand(plugin: BrumesPlugin, id: string): void {
+function registerCalloutCommand(plugin: NotebookPlugin, id: string): void {
 	const entryAt = () => plugin.settings.callouts.find((c) => commandId(c) === id) ?? null;
 	const entry = entryAt();
 	if (!entry) {
@@ -95,7 +95,7 @@ function registerCalloutCommand(plugin: BrumesPlugin, id: string): void {
 				return false;
 			}
 
-			const required = findGameRegistration(plugin.settings.mode)?.installation?.requires ?? [];
+			const required = findPackRegistration(plugin.settings.mode)?.installation?.requires ?? [];
 			const visible = isCalloutAvailable(current, plugin.settings.mode, required);
 			if (!visible) {
 				return false;
@@ -116,7 +116,7 @@ function registerCalloutCommand(plugin: BrumesPlugin, id: string): void {
 }
 
 /** Called from `onunload`, on the same pattern as the plugin's owned `<style>` element. */
-export function clearCalloutCommands(plugin: BrumesPlugin): void {
+export function clearCalloutCommands(plugin: NotebookPlugin): void {
 	for (const id of Array.from(registered.keys())) {
 		plugin.removeCommand(id);
 	}

@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-const source = readFileSync("src/BrumesPlugin.ts", "utf8");
+const source = readFileSync("src/NotebookPlugin.ts", "utf8");
 const onload = source.match(/async onload\(\) \{(?<body>[\s\S]*?)\r?\n\t\}\r?\n\r?\n\tonunload\(\)/)
 	?.groups?.body;
 
-assert.ok(onload, "BrumesPlugin.onload must remain inspectable by this lifecycle contract");
+assert.ok(onload, "NotebookPlugin.onload must remain inspectable by this lifecycle contract");
 
 const layoutReady = onload.match(
 	/this\.app\.workspace\.onLayoutReady\(\(\) => \{(?<body>[\s\S]*?)\r?\n\t\t\}\)/,

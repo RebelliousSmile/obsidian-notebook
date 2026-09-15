@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const temporaryDirectory = await mkdtemp(join(tmpdir(), "handbook-callouts-"));
+const temporaryDirectory = await mkdtemp(join(tmpdir(), "notebook-callouts-"));
 const output = join(temporaryDirectory, "assert-callouts.mjs");
 
 try {

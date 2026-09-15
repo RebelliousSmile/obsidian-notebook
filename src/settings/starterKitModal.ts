@@ -1,13 +1,13 @@
 import { App, Modal, Notice, Setting } from "obsidian";
-import type BrumesPlugin from "../BrumesPlugin";
-import { STARTER_KITS, StarterKit } from "../games/starterKits";
+import type NotebookPlugin from "../NotebookPlugin";
+import { STARTER_KITS, StarterKit } from "../packs/starterKits";
 
-/** First-run choice for marketplace and core installs with no game pack. */
+/** First-run choice for marketplace and core installs with no pack pack. */
 export class StarterKitModal extends Modal {
 	// eslint-disable-next-line obsidianmd/prefer-active-doc
 	constructor(
 		app: App,
-		private readonly plugin: BrumesPlugin,
+		private readonly plugin: NotebookPlugin,
 	) {
 		super(app);
 	}
@@ -15,7 +15,7 @@ export class StarterKitModal extends Modal {
 	onOpen(): void {
 		this.setTitle("Choose a starter kit");
 		this.contentEl.createEl("p", {
-			text: "Handbook has no game installed yet. Choose a starter kit to install its schema source and make the plugin useful immediately.",
+			text: "Notebook has no pack installed yet. Choose a starter kit to install its schema source and make the plugin useful immediately.",
 		});
 		this.render();
 	}

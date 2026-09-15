@@ -3,26 +3,26 @@ import { readFileSync } from "node:fs";
 const source = readFileSync("src/settings/index.ts", "utf8");
 const sourceModal = readFileSync("src/settings/sourceModal.ts", "utf8");
 const themeContentsModal = readFileSync("src/settings/themeContentsModal.ts", "utf8");
-const plugin = readFileSync("src/BrumesPlugin.ts", "utf8");
+const plugin = readFileSync("src/NotebookPlugin.ts", "utf8");
 const richDescriptions = [
 	"createOverrideDescription",
 ];
 
 const failures = [];
 
-if (!source.includes("this.renderGameVariant(generalSection)")) {
-	failures.push("The general settings do not render the conditional game variant selector.");
+if (!source.includes("this.renderPackVariant(generalSection)")) {
+	failures.push("The general settings do not render the conditional pack variant selector.");
 }
 
-if (!/if \(GAME_PACKS\.length === 0\) \{\s*drop\.addOption\("none", "No game installed"\);\s*\}/m.test(source)) {
-	failures.push("The empty game option remains visible after real packs are installed.");
+if (!/if \(STYLE_PACKS\.length === 0\) \{\s*drop\.addOption\("none", "No pack installed"\);\s*\}/m.test(source)) {
+	failures.push("The empty pack option remains visible after real packs are installed.");
 }
 
 if (!source.includes('button.buttonEl.classList.add("mod-warning")') || !source.includes('setButtonText("Remove")') || !source.includes("SchemaSourceRemovalModal")) {
 	failures.push("Registered schema sources have no warning-styled removal action.");
 }
 
-if (!sourceModal.includes('setTitle("Remove schema source")') || !sourceModal.includes("all of its installed game packs")) {
+if (!sourceModal.includes('setTitle("Remove schema source")') || !sourceModal.includes("all of its installed pack packs")) {
 	failures.push("Schema source removal is not confirmed with its installed-pack impact.");
 }
 
@@ -30,8 +30,8 @@ if (!sourceModal.includes("Schema source was not installed: ${message}")) {
 	failures.push("Schema installation failures hide the actionable cause from the notice.");
 }
 
-if (!plugin.includes("removeSchemaSourceStorage(this, source.id)") || !plugin.includes("await this.refreshGameRegistry()")) {
-	failures.push("Removing a schema source does not delete its storage and rebuild the live game registry.");
+if (!plugin.includes("removeSchemaSourceStorage(this, source.id)") || !plugin.includes("await this.refreshPackRegistry()")) {
+	failures.push("Removing a schema source does not delete its storage and rebuild the live pack registry.");
 }
 
 if (!source.includes('setButtonText("Reload installed schemas")') || !source.includes("this.plugin.reloadInstalledSchemaSources()")) {
@@ -43,15 +43,15 @@ if (!plugin.includes("async reloadInstalledSchemaSources()") || !plugin.includes
 }
 
 if (!source.includes('variants.length < 2')) {
-	failures.push("The game variant selector is not hidden for packs without choices.");
+	failures.push("The pack variant selector is not hidden for packs without choices.");
 }
 
 if (!source.includes('.setName("Univers")')) {
-	failures.push("The game variant selector has no French-first visible label.");
+	failures.push("The pack variant selector has no French-first visible label.");
 }
 
 if (!/if \(polarities\.length < 2\) \{\s*return;\s*\}/m.test(source)) {
-	failures.push("The colour scheme setting remains visible when the active game has no light/dark choice.");
+	failures.push("The colour scheme setting remains visible when the active pack has no light/dark choice.");
 }
 
 if (!source.includes('setName("Theme features")') || !source.includes("new ThemeContentsModal(")) {
@@ -74,7 +74,7 @@ if (!source.includes("this.renderPersonalOverrides(generalSection)")) {
 	failures.push("Removing the migration notice also hid the personal overrides control.");
 }
 
-if (!themeContentsModal.includes("isCalloutAvailable(callout, gameId, requiredCapabilities)")) {
+if (!themeContentsModal.includes("isCalloutAvailable(callout, packId, requiredCapabilities)")) {
 	failures.push("The theme inventory does not resolve callouts from the active manifest capabilities.");
 }
 

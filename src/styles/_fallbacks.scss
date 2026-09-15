@@ -1,8 +1,8 @@
 // What a block looks like when its illustration is not in the vault.
 //
-// The plugin no longer carries its art inside the stylesheet: a game declares
+// The plugin no longer carries its art inside the stylesheet: a pack declares
 // its files, the plugin looks for them in the vault, and poses
-// `brumes-missing--<role>` on the body for every role it has no file behind —
+// `notebook-missing--<role>` on the body for every role it has no file behind —
 // one it declared and could not find, or one it never declared at all. Both
 // are the same thing to a template: a variable with no value.
 //
@@ -12,5 +12,5 @@
 // rather than leaving an empty box behind.
 //
 // Each rule is scoped like the rule it degrades. A note ornament belongs to a
-// game, so its fallback carries that game's class; a canvas node is styled
-// outside any game, so its fallback is too.
+// pack, so its fallback carries that pack's class; a canvas node is styled
+// outside any pack, so its fallback is too.

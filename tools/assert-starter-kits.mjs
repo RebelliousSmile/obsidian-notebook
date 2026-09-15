@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const directory = await mkdtemp(join(tmpdir(), "handbook-starter-kits-"));
+const directory = await mkdtemp(join(tmpdir(), "notebook-starter-kits-"));
 const output = join(directory, "harness.mjs");
 try {
 	await build({ entryPoints: ["tools/starterKits.harness.mts"], bundle: true, platform: "node", format: "esm", outfile: output, logLevel: "silent", external: ["obsidian"] });

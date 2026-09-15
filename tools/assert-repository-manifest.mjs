@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const temporaryDirectory = await mkdtemp(join(tmpdir(), "handbook-repository-manifest-"));
+const temporaryDirectory = await mkdtemp(join(tmpdir(), "notebook-repository-manifest-"));
 const output = join(temporaryDirectory, "repository-manifest.mjs");
 
 try {

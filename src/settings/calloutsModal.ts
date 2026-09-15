@@ -1,5 +1,5 @@
 import { App, Modal, Notice, Setting, getIconIds } from "obsidian";
-import BrumesPlugin from "../BrumesPlugin";
+import NotebookPlugin from "../NotebookPlugin";
 import { generateCalloutId } from "../features/callouts/migrateAliases";
 import { sanitizeAliases } from "../features/callouts/sanitizeAlias";
 import {
@@ -9,17 +9,17 @@ import {
 	CalloutScope,
 	CalloutTemplate,
 } from "../features/callouts/types";
-import { GAME_PACKS } from "../games/registry";
+import { STYLE_PACKS } from "../packs/registry";
 import { log } from "../utils/logger";
 
-const SETTINGS_SAVE_LOG_MESSAGE = "Failed to save Handbook settings";
-const SETTINGS_SAVE_NOTICE = "Failed to save Handbook settings.";
+const SETTINGS_SAVE_LOG_MESSAGE = "Failed to save Notebook settings";
+const SETTINGS_SAVE_NOTICE = "Failed to save Notebook settings.";
 
 /**
  * Two scopes cover the same callout invocation when either is "all", or
- * they name the same game — narrower conflicts (different single games)
+ * they name the same pack — narrower conflicts (different single packs)
  * are allowed on purpose, so the same alias can mean different things in
- * two different game lines.
+ * two different pack lines.
  */
 function scopesOverlap(a: CalloutScope, b: CalloutScope): boolean {
 	return a === "all" || b === "all" || a === b;
@@ -31,7 +31,7 @@ function scopesOverlap(a: CalloutScope, b: CalloutScope): boolean {
  * this modal, they are edited inline on screen A.
  */
 export class CalloutsModal extends Modal {
-	private readonly plugin: BrumesPlugin;
+	private readonly plugin: NotebookPlugin;
 	private readonly existing: CalloutDefinition | null;
 	private readonly onSaved: () => void;
 
@@ -49,7 +49,7 @@ export class CalloutsModal extends Modal {
 	// eslint-disable-next-line obsidianmd/prefer-active-doc -- false positive: the rule matches the literal token "constructor", not a `window` reference.
 	constructor(
 		app: App,
-		plugin: BrumesPlugin,
+		plugin: NotebookPlugin,
 		existing: CalloutDefinition | null,
 		onSaved: () => void,
 	) {
@@ -103,7 +103,7 @@ export class CalloutsModal extends Modal {
 			.setDesc("Où ce callout est disponible.")
 			.addDropdown((drop) => {
 				drop.addOption("all", "Tous les jeux");
-				for (const pack of GAME_PACKS) {
+				for (const pack of STYLE_PACKS) {
 					drop.addOption(pack.id, pack.label);
 				}
 				drop.setValue(this.calloutScope).onChange((value) => {

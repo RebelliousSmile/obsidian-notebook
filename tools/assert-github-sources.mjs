@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const directory = await mkdtemp(join(tmpdir(), "handbook-github-sources-"));
+const directory = await mkdtemp(join(tmpdir(), "notebook-github-sources-"));
 const stub = join(directory, "obsidian.mjs");
 const output = join(directory, "harness.mjs");
 try {

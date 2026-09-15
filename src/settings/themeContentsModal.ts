@@ -1,22 +1,22 @@
 import { App, Modal, Setting } from "obsidian";
-import { BRUMES_BLOCKS } from "../features/blocks/registry";
-import type { BrumesBlock } from "../features/blocks/types";
+import { NOTEBOOK_BLOCKS } from "../features/blocks/registry";
+import type { NotebookBlock } from "../features/blocks/types";
 import type { CalloutDefinition } from "../features/callouts/types";
 import { isCalloutAvailable } from "../features/callouts/types";
-import type { GameRegistration } from "../games/variants";
+import type { PackRegistration } from "../packs/variants";
 
 export interface ThemeContents {
-	handouts: BrumesBlock<unknown>[];
+	handouts: NotebookBlock<unknown>[];
 	callouts: CalloutDefinition[];
-	blocks: BrumesBlock<unknown>[];
+	blocks: NotebookBlock<unknown>[];
 }
 
-/** Return only features which the active installed game actually declares. */
+/** Return only features which the active installed pack actually declares. */
 export function resolveThemeContents(
-	registration: GameRegistration,
+	registration: PackRegistration,
 	callouts: CalloutDefinition[],
 ): ThemeContents {
-	const gameId = registration.pack.id;
+	const packId = registration.pack.id;
 	const requiredBlocks = new Set(
 		(registration.installation?.requires ?? [])
 			.filter((capability) => capability.startsWith("block:"))
@@ -24,23 +24,23 @@ export function resolveThemeContents(
 	);
 	const requiredCapabilities = registration.installation?.requires ?? [];
 
-	const blocks = BRUMES_BLOCKS.filter((block) => requiredBlocks.has(block.id));
+	const blocks = NOTEBOOK_BLOCKS.filter((block) => requiredBlocks.has(block.id));
 	return {
 		handouts: blocks.filter((block) => block.handout),
 		callouts: callouts.filter((callout) =>
-			isCalloutAvailable(callout, gameId, requiredCapabilities)),
+			isCalloutAvailable(callout, packId, requiredCapabilities)),
 		blocks,
 	};
 }
 
 export class ThemeContentsModal extends Modal {
-	private readonly registration: GameRegistration;
+	private readonly registration: PackRegistration;
 	private readonly callouts: CalloutDefinition[];
 
 	// eslint-disable-next-line obsidianmd/prefer-active-doc -- false positive: the rule matches the literal token "constructor", not a `window` reference.
 	constructor(
 		app: App,
-		registration: GameRegistration,
+		registration: PackRegistration,
 		callouts: CalloutDefinition[],
 	) {
 		super(app);
@@ -54,7 +54,7 @@ export class ThemeContentsModal extends Modal {
 
 		this.contentEl.createEl("h3", { text: "Handouts" });
 		if (contents.handouts.length === 0) {
-			this.contentEl.createEl("p", { text: "No handout is declared for this game." });
+			this.contentEl.createEl("p", { text: "No handout is declared for this pack." });
 		} else {
 			for (const handout of contents.handouts) {
 				new Setting(this.contentEl)
@@ -65,7 +65,7 @@ export class ThemeContentsModal extends Modal {
 
 		this.contentEl.createEl("h3", { text: "Callouts" });
 		if (contents.callouts.length === 0) {
-			this.contentEl.createEl("p", { text: "No callout is declared for this game." });
+			this.contentEl.createEl("p", { text: "No callout is declared for this pack." });
 		} else {
 			for (const callout of contents.callouts) {
 				const syntax = callout.aliases.map((alias) => `[!${alias}]`);
@@ -77,7 +77,7 @@ export class ThemeContentsModal extends Modal {
 
 		this.contentEl.createEl("h3", { text: "Code blocks" });
 		if (contents.blocks.length === 0) {
-			this.contentEl.createEl("p", { text: "No code block is declared for this game." });
+			this.contentEl.createEl("p", { text: "No code block is declared for this pack." });
 		} else {
 			for (const block of contents.blocks) {
 				const ids = [block.id, ...(block.aliases ?? [])];

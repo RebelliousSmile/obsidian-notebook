@@ -25,7 +25,7 @@ function readReference(value: unknown): SchemaSourceReference | null {
 	return null;
 }
 
-/** Strict data-only catalogue shipped with every Handbook release. */
+/** Strict data-only catalogue shipped with every Notebook release. */
 export function readStarterKitCatalog(value: unknown): StarterKit[] {
 	if (!isRecord(value) || value.manifestVersion !== KIT_MANIFEST_VERSION || !Array.isArray(value.kits)) return [];
 	const kits: StarterKit[] = [];

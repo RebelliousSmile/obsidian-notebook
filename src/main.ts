@@ -1,2 +1,2 @@
-import BrumesPlugin from "./BrumesPlugin";
-export default BrumesPlugin;
+import NotebookPlugin from "./NotebookPlugin";
+export default NotebookPlugin;

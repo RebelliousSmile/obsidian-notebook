@@ -1,14 +1,14 @@
 import { Plugin } from "obsidian";
 import postcss from "postcss";
 import { logScope } from "../utils/logger";
-import { GameFontFace, GamePack, GameStyleTokens } from "./types";
-import type { GamePluginInstallation } from "./pluginManifest";
+import { StyleFontFace, StylePack, StyleTokens } from "./types";
+import type { PackPluginInstallation } from "./pluginManifest";
 
-const log = logScope("Games");
+const log = logScope("Packs");
 
 /**
- * The folder a game's illustrations are expected in when its pack does not
- * name one: a subfolder of Handbook's own folder in the vault, one per game.
+ * The folder a pack's illustrations are expected in when its pack does not
+ * name one: a subfolder of Notebook's own folder in the vault, one per pack.
  * Keeping it there rather than at the vault root means a user's notes are
  * never polluted by files they did not write.
  */
@@ -16,7 +16,7 @@ export const DEFAULT_ASSET_ROOT = "assets";
 
 /** The custom property a template reads to find an illustration. */
 export function assetVariable(role: string): string {
-	return `--brumes-image-${role}`;
+	return `--notebook-image-${role}`;
 }
 
 /**
@@ -27,7 +27,7 @@ export function assetVariable(role: string): string {
  * its frame needs a flat background and a border to stay a card.
  */
 export function missingAssetClass(role: string): string {
-	return `brumes-missing--${role}`;
+	return `notebook-missing--${role}`;
 }
 
 /** The `format()` hint a face needs, by the extension of its file. */
@@ -49,11 +49,11 @@ function hasSupportedExtension(file: string, supported: string[]): boolean {
 	return supported.includes(fileExtension(file));
 }
 
-export interface GameAssetState {
+export interface PackAssetState {
 	/** The pack these were resolved for, so a stale state is never used. */
 	packId: string;
-	/** One `--brumes-image-<role>` per file actually present. */
-	tokens: GameStyleTokens;
+	/** One `--notebook-image-<role>` per file actually present. */
+	tokens: StyleTokens;
 	/** The roles the pack declares, in declaration order. */
 	roles: string[];
 	/** The roles whose file is absent, and the path each was looked for at. */
@@ -70,7 +70,7 @@ export interface GameAssetState {
 	packCss: string;
 }
 
-export function emptyAssetState(packId: string): GameAssetState {
+export function emptyAssetState(packId: string): PackAssetState {
 	return {
 		packId,
 		tokens: {},
@@ -85,15 +85,15 @@ export function emptyAssetState(packId: string): GameAssetState {
 }
 
 /**
- * Every role a game illustrates, across all the games the plugin knows.
+ * Every role a pack illustrates, across all the packs the plugin knows.
  *
  * A pack that omits a role one of the partials draws would otherwise leave the
  * ornament in place with nothing behind it — a box reserved for an image that
  * never comes. The catalogue is the union of what the packs declare rather
- * than a list kept by hand: a role exists here from the moment one game names
- * it, and the fallback covers it for every game that does not.
+ * than a list kept by hand: a role exists here from the moment one pack names
+ * it, and the fallback covers it for every pack that does not.
  */
-export function styledAssetRoles(packs: GamePack[]): string[] {
+export function styledAssetRoles(packs: StylePack[]): string[] {
 	const roles: string[] = [];
 
 	for (const pack of packs) {
@@ -113,13 +113,13 @@ export function styledAssetRoles(packs: GamePack[]): string[] {
 }
 
 /**
- * The roles the active game has no file behind, whether it declared one and
+ * The roles the active pack has no file behind, whether it declared one and
  * the file is absent or it declared nothing at all. Both are the same thing to
  * a template: a variable with no value.
  */
 export function missingAssetRoles(
-	state: GameAssetState,
-	packs: GamePack[],
+	state: PackAssetState,
+	packs: StylePack[],
 ): string[] {
 	const missing: string[] = [];
 
@@ -164,8 +164,8 @@ function relativePluginPath(root: string, declared: string): string | null {
 
 function assetFolder(
 	plugin: Plugin,
-	pack: GamePack,
-	installation?: GamePluginInstallation,
+	pack: StylePack,
+	installation?: PackPluginInstallation,
 ): string | null {
 	const declared = pack.assets?.root;
 	if (installation) {
@@ -189,17 +189,17 @@ function assetFolder(
  * property the SCSS already reads, a typeface becomes an `@font-face` rule
  * the plugin writes into the style element it owns.
  *
- * The existence check runs once per game switch, not once per render: a block
+ * The existence check runs once per pack switch, not once per render: a block
  * asks the style for a variable, and the style either has it or does not.
  * A missing file costs its own illustration and nothing else — never a load
  * failure, never a broken image in a note. A missing typeface costs no more:
  * every token names a fallback after the family.
  */
-export async function resolveGameAssets(
+export async function resolvePackAssets(
 	plugin: Plugin,
-	pack: GamePack,
-	installation?: GamePluginInstallation,
-): Promise<GameAssetState> {
+	pack: StylePack,
+	installation?: PackPluginInstallation,
+): Promise<PackAssetState> {
 	const state = emptyAssetState(pack.id);
 	const images = pack.assets?.images;
 	const fonts = pack.assets?.fonts;
@@ -329,14 +329,14 @@ export async function resolveGameAssets(
 	return state;
 }
 
-function validatePackCss(source: string, pack: GamePack): void {
+function validatePackCss(source: string, pack: StylePack): void {
 	const root = postcss.parse(source);
 	root.walkAtRules((rule) => {
 		if (rule.name === "import") throw new Error("@import is not allowed");
 	});
 	root.walkRules((rule) => {
 		for (const selector of rule.selectors) {
-			if (!selector.trim().startsWith(`body.brumes--${pack.id}`)) {
+			if (!selector.trim().startsWith(`body.notebook--${pack.id}`)) {
 				throw new Error(`selector escapes pack scope: ${selector}`);
 			}
 		}
@@ -347,7 +347,7 @@ async function rewritePackUrls(
 	source: string,
 	stylesheet: string,
 	root: string,
-	pack: GamePack,
+	pack: StylePack,
 	plugin: Plugin,
 ): Promise<string> {
 	const declared = new Set<string>();
@@ -372,7 +372,7 @@ async function rewritePackUrls(
 	return rewritten;
 }
 
-function readFontFace(declared: string | GameFontFace): GameFontFace {
+function readFontFace(declared: string | StyleFontFace): StyleFontFace {
 	return typeof declared === "string" ? { file: declared } : declared;
 }
 
@@ -383,7 +383,7 @@ function readFontFace(declared: string | GameFontFace): GameFontFace {
  */
 function renderFontFace(
 	family: string,
-	face: GameFontFace,
+	face: StyleFontFace,
 	url: string,
 ): string {
 	const extension = face.file.split(".").pop() ?? "";

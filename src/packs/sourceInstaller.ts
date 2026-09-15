@@ -1,5 +1,5 @@
 import { Plugin } from "obsidian";
-import { GamePluginManifest, readGamePluginManifest } from "./pluginManifest";
+import { PackPluginManifest, readPackPluginManifest } from "./pluginManifest";
 import { readSchemaRepositoryManifest } from "./repositoryManifest";
 import { ResolvedGithubSource } from "./githubSources";
 import { SchemaSource } from "./sources";
@@ -9,7 +9,7 @@ import {
 	schemaSourceStoragePaths,
 } from "./storage";
 
-const MANIFEST_NAME = "handbook.json";
+const MANIFEST_NAME = "notebook.json";
 const MAX_PACKS = 64;
 const MAX_ASSETS = 256;
 const MAX_ASSET_BYTES = 20 * 1024 * 1024;
@@ -24,7 +24,7 @@ function safeRelativePath(path: string): string | null {
 	return clean;
 }
 
-function assetPaths(manifestPath: string, pack: GamePluginManifest): Array<{ source: string; target: string }> {
+function assetPaths(manifestPath: string, pack: PackPluginManifest): Array<{ source: string; target: string }> {
 	const root = manifestPath.slice(0, manifestPath.lastIndexOf("/"));
 	const assetRoot = pack.pack.assets?.root ?? "assets";
 	const stylesheets = pack.pack.assets?.stylesheets ?? [];
@@ -64,13 +64,13 @@ export async function installResolvedSchemaSource(
 	try {
 		rootValue = JSON.parse(rootText);
 	} catch {
-		throw new Error("handbook.json is not valid JSON");
+		throw new Error("notebook.json is not valid JSON");
 	}
 	const catalogue = readSchemaRepositoryManifest(rootValue);
 	if (!catalogue.manifest) throw new Error(catalogue.error);
-	if (catalogue.manifest.packs.length > MAX_PACKS) throw new Error(`handbook.json declares more than ${MAX_PACKS} packs`);
+	if (catalogue.manifest.packs.length > MAX_PACKS) throw new Error(`notebook.json declares more than ${MAX_PACKS} packs`);
 	if (catalogue.manifest.repository.toLowerCase() !== source.repository.toLowerCase()) {
-		throw new Error("handbook.json repository does not match the registered source");
+		throw new Error("notebook.json repository does not match the registered source");
 	}
 
 	const prepared: Array<{ id: string; version: string; path: string; raw: string; assets: Array<{ source: string; target: string }> }> = [];
@@ -82,7 +82,7 @@ export async function installResolvedSchemaSource(
 		} catch {
 			throw new Error(`${entry.path} is not valid JSON`);
 		}
-		const parsed = readGamePluginManifest(value, plugin.manifest.version);
+		const parsed = readPackPluginManifest(value, plugin.manifest.version);
 		if (!parsed.manifest) throw new Error(`${entry.path}: ${parsed.error}`);
 		if (parsed.manifest.pack.id !== entry.id || parsed.manifest.version !== entry.version) {
 			throw new Error(`${entry.path} does not match its catalogue entry`);

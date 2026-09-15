@@ -1,5 +1,5 @@
-import { readSchemaRepositoryManifest } from "../src/games/repositoryManifest";
-import { schemaSourceId } from "../src/games/sources";
+import { readSchemaRepositoryManifest } from "../src/packs/repositoryManifest";
+import { schemaSourceId } from "../src/packs/sources";
 
 const failures: string[] = [];
 function check(label: string, held: boolean): void {
@@ -11,8 +11,8 @@ const valid = {
 	repository: "RebelliousSmile/schema-pbta",
 	name: "Schema PbtA",
 	packs: [
-		{ id: "apocalypse-world", version: "1.0.0", path: "handbook/apocalypse-world/pack.json" },
-		{ id: "monster-of-the-week", version: "1.2.0", path: "handbook/monster-of-the-week/pack.json" },
+		{ id: "apocalypse-world", version: "1.0.0", path: "notebook/apocalypse-world/pack.json" },
+		{ id: "monster-of-the-week", version: "1.2.0", path: "notebook/monster-of-the-week/pack.json" },
 	],
 };
 

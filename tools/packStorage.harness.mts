@@ -1,9 +1,9 @@
 import {
-	gameStoragePaths,
+	packStoragePaths,
 	overridesReadPath,
 	packsReadPath,
-	prepareGameStorage,
-} from "../src/games/storage";
+	preparePackStorage,
+} from "../src/packs/storage";
 
 const failures: string[] = [];
 function check(claim: string, held: boolean): void {
@@ -12,7 +12,7 @@ function check(claim: string, held: boolean): void {
 
 function fakePlugin(initialFiles: Record<string, string>, failCopy = "") {
 	const files = new Map(Object.entries(initialFiles));
-	const directories = new Set<string>([".config-obsidian", "plugins", "plugins/obsidian-handbook"]);
+	const directories = new Set<string>([".config-obsidian", "plugins", "plugins/obsidian-notebook"]);
 	let failing = failCopy;
 
 	function parents(path: string): void {
@@ -84,7 +84,7 @@ function fakePlugin(initialFiles: Record<string, string>, failCopy = "") {
 
 	return {
 		plugin: {
-			manifest: { dir: "plugins/obsidian-handbook", version: "2.7.0" },
+			manifest: { dir: "plugins/obsidian-notebook", version: "2.7.0" },
 			app: { vault: { configDir: ".config-obsidian", adapter } },
 		} as unknown as import("obsidian").Plugin,
 		files,
@@ -96,42 +96,42 @@ function fakePlugin(initialFiles: Record<string, string>, failCopy = "") {
 async function run(): Promise<void> {
 	{
 		const state = fakePlugin({
-			"plugins/obsidian-handbook/packs/adrenaline/pack.json": "pack",
-			"plugins/obsidian-handbook/packs/adrenaline/assets/paper.webp": "image",
-			"plugins/obsidian-handbook/overrides.json": "override",
+			"plugins/obsidian-notebook/packs/adrenaline/pack.json": "pack",
+			"plugins/obsidian-notebook/packs/adrenaline/assets/paper.webp": "image",
+			"plugins/obsidian-notebook/overrides.json": "override",
 		});
-		const paths = gameStoragePaths(state.plugin);
-		check("configDir determines the root", paths.root === ".config-obsidian/handbook");
-		await prepareGameStorage(state.plugin);
+		const paths = packStoragePaths(state.plugin);
+		check("configDir determines the root", paths.root === ".config-obsidian/notebook");
+		await preparePackStorage(state.plugin);
 		check("the pack manifest migrates", state.files.has(`${paths.packs}/adrenaline/pack.json`));
 		check("nested assets migrate", state.files.has(`${paths.packs}/adrenaline/assets/paper.webp`));
 		check("the override migrates", state.files.get(paths.overrides) === "override");
-		state.directories.delete("plugins/obsidian-handbook/packs");
+		state.directories.delete("plugins/obsidian-notebook/packs");
 		check("persistent packs survive plugin replacement", await packsReadPath(state.plugin) === paths.packs);
 		check("persistent overrides survive plugin replacement", await overridesReadPath(state.plugin) === paths.overrides);
 	}
 
 	{
 		const state = fakePlugin({
-			".config-obsidian/handbook/packs/current/pack.json": "current",
-			"plugins/obsidian-handbook/overrides.json": "legacy override",
+			".config-obsidian/notebook/packs/current/pack.json": "current",
+			"plugins/obsidian-notebook/overrides.json": "legacy override",
 		});
-		await prepareGameStorage(state.plugin);
-		const paths = gameStoragePaths(state.plugin);
+		await preparePackStorage(state.plugin);
+		const paths = packStoragePaths(state.plugin);
 		check("existing packs are preserved", state.files.get(`${paths.packs}/current/pack.json`) === "current");
 		check("a missing override migrates independently", state.files.get(paths.overrides) === "legacy override");
 	}
 
 	{
-		const source = "plugins/obsidian-handbook/packs/adrenaline/pack.json";
+		const source = "plugins/obsidian-notebook/packs/adrenaline/pack.json";
 		const state = fakePlugin({ [source]: "pack" }, source);
-		const paths = gameStoragePaths(state.plugin);
-		await prepareGameStorage(state.plugin);
+		const paths = packStoragePaths(state.plugin);
+		await preparePackStorage(state.plugin);
 		check("failed migration publishes no packs folder", !state.directories.has(paths.packs));
 		check("failed migration removes its temporary folder", !state.directories.has(`${paths.root}/.packs-migration`));
 		check("failed migration preserves the source", state.files.get(source) === "pack");
 		state.allowCopies();
-		await prepareGameStorage(state.plugin);
+		await preparePackStorage(state.plugin);
 		check("a failed migration is retryable", state.files.get(`${paths.packs}/adrenaline/pack.json`) === "pack");
 	}
 }
@@ -141,7 +141,7 @@ run().then(() => {
 		for (const failure of failures) console.error(`not held: ${failure}`);
 		process.exit(1);
 	}
-	console.log("game storage: green");
+	console.log("pack storage: green");
 }).catch((error: unknown) => {
 	console.error(error);
 	process.exit(1);

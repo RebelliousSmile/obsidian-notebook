@@ -11,8 +11,8 @@ import urllib.request
 import websocket
 
 
-PORT = int(os.environ.get("HANDBOOK_E2E_CDP_PORT", "9223"))
-OUTPUT_DIR = os.environ["HANDBOOK_E2E_OUTPUT_DIR"]
+PORT = int(os.environ.get("NOTEBOOK_E2E_CDP_PORT", "9223"))
+OUTPUT_DIR = os.environ["NOTEBOOK_E2E_OUTPUT_DIR"]
 
 
 def targets():
@@ -158,7 +158,7 @@ elif action == "open-source":
         """
         (() => {
           const items = [...document.querySelectorAll('.vertical-tab-nav-item')]
-            .filter(node => node.innerText.trim() === 'Handbook');
+            .filter(node => node.innerText.trim() === 'Notebook');
           const item = items.at(-1);
           if (!item) return false;
           item.click();
@@ -167,7 +167,7 @@ elif action == "open-source":
         """
     )
     if not switched:
-        raise RuntimeError("Handbook settings tab was not found")
+        raise RuntimeError("Notebook settings tab was not found")
     wait_for("document.body.innerText.includes('Schema sources')")
     clicked = evaluate(
         """

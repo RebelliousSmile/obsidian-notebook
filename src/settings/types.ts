@@ -6,46 +6,46 @@ import {
 	sanitizeAliases,
 } from "../features/callouts/sanitizeAlias";
 import {
-	DEFAULT_GAME_PACK_ID,
-	GAME_REGISTRATIONS,
-	findGamePack,
-	normalizeGameVariantId,
-} from "../games/registry";
+	DEFAULT_STYLE_PACK_ID,
+	PACK_REGISTRATIONS,
+	findStylePack,
+	normalizePackVariantId,
+} from "../packs/registry";
 import { logScope } from "../utils/logger";
-import { SchemaSource, SchemaSourceReference, isSafeSchemaSourceRepository, schemaSourceId } from "../games/sources";
+import { SchemaSource, SchemaSourceReference, isSafeSchemaSourceRepository, schemaSourceId } from "../packs/sources";
 
 export { sanitizeAlias, sanitizeAliases };
 
 /**
- * The identifier of a game pack, and the value written in the user's
+ * The identifier of a pack pack, and the value written in the user's
  * `data.json`. It was a closed union of three; it is now open, so that adding
- * a game is adding a pack and nothing else. `normalizeMode` stays the only
+ * a pack is adding a pack and nothing else. `normalizeMode` stays the only
  * door in: it is what guarantees a saved value still resolves.
  */
-export type BrumesMode = string;
+export type StylePackId = string;
 
-const modeLog = logScope("Games");
+const modeLog = logScope("Packs");
 
 export type LogLevel = "none" | "error" | "warn" | "info" | "debug";
 export type ColourScheme = "obsidian" | "light" | "dark";
 
-export interface BrumesFeatureSettings {
+export interface NotebookFeatureSettings {
 	workspaceTheme: boolean;
 }
 
-export interface BrumesSettings {
-	mode: BrumesMode;
-	gameVariants: Record<string, string>;
+export interface NotebookSettings {
+	mode: StylePackId;
+	packVariants: Record<string, string>;
 	colourScheme: ColourScheme;
 	logLevel: LogLevel;
-	features: BrumesFeatureSettings;
+	features: NotebookFeatureSettings;
 	callouts: CalloutDefinition[];
 	schemaSources: SchemaSource[];
 }
 
-export const DEFAULT_SETTINGS: BrumesSettings = {
-	mode: DEFAULT_GAME_PACK_ID,
-	gameVariants: {},
+export const DEFAULT_SETTINGS: NotebookSettings = {
+	mode: DEFAULT_STYLE_PACK_ID,
+	packVariants: {},
 	colourScheme: "obsidian",
 	logLevel: "error",
 	features: {
@@ -82,18 +82,18 @@ function normalizeSchemaSources(value: unknown): SchemaSource[] {
 const LOG_LEVELS: LogLevel[] = ["none", "error", "warn", "info", "debug"];
 const COLOUR_SCHEMES: ColourScheme[] = ["obsidian", "light", "dark"];
 
-export function normalizeMode(mode: unknown): BrumesMode {
-	if (findGamePack(mode)) {
-		return mode as BrumesMode;
+export function normalizeMode(mode: unknown): StylePackId {
+	if (findStylePack(mode)) {
+		return mode as StylePackId;
 	}
 
 	if (typeof mode === "string" && mode.length > 0) {
 		modeLog.warn(
-			`No game pack answers to "${mode}". Handbook is using its neutral appearance; reinstall the source that provided this pack if needed.`,
+			`No pack pack answers to "${mode}". Notebook is using its neutral appearance; reinstall the source that provided this pack if needed.`,
 		);
 	}
 
-	return GAME_REGISTRATIONS[0]?.pack.id ?? DEFAULT_SETTINGS.mode;
+	return PACK_REGISTRATIONS[0]?.pack.id ?? DEFAULT_SETTINGS.mode;
 }
 
 function normalizeLogLevel(level: unknown): LogLevel {
@@ -115,15 +115,15 @@ function normalizeColourScheme(value: unknown): ColourScheme {
 	return DEFAULT_SETTINGS.colourScheme;
 }
 
-function normalizeGameVariants(value: unknown): Record<string, string> {
+function normalizePackVariants(value: unknown): Record<string, string> {
 	const source =
 		typeof value === "object" && value !== null
 			? (value as Record<string, unknown>)
 			: {};
 	const normalized: Record<string, string> = {};
 
-	for (const registration of GAME_REGISTRATIONS) {
-		const id = normalizeGameVariantId(
+	for (const registration of PACK_REGISTRATIONS) {
+		const id = normalizePackVariantId(
 			registration.pack.id,
 			source[registration.pack.id],
 		);
@@ -137,13 +137,13 @@ function normalizeGameVariants(value: unknown): Record<string, string> {
 
 /**
  * Keep every declared feature flag, defaulting the ones the saved data misses.
- * Adding a flag to `BrumesFeatureSettings` and `DEFAULT_SETTINGS` is enough.
+ * Adding a flag to `NotebookFeatureSettings` and `DEFAULT_SETTINGS` is enough.
  */
 function normalizeFeatures(
-	features: Partial<BrumesFeatureSettings>,
-): BrumesFeatureSettings {
+	features: Partial<NotebookFeatureSettings>,
+): NotebookFeatureSettings {
 	const normalized = { ...DEFAULT_SETTINGS.features };
-	const keys = Object.keys(normalized) as (keyof BrumesFeatureSettings)[];
+	const keys = Object.keys(normalized) as (keyof NotebookFeatureSettings)[];
 
 	for (const key of keys) {
 		const value = features[key];
@@ -157,14 +157,14 @@ function normalizeFeatures(
 }
 
 export function normalizeSettings(
-	data: Partial<BrumesSettings> | null | undefined,
-): BrumesSettings {
+	data: Partial<NotebookSettings> | null | undefined,
+): NotebookSettings {
 	const source = data ?? {};
-	const features: Partial<BrumesFeatureSettings> = source.features ?? {};
+	const features: Partial<NotebookFeatureSettings> = source.features ?? {};
 
 	return {
 		mode: normalizeMode(source.mode),
-		gameVariants: normalizeGameVariants(source.gameVariants),
+		packVariants: normalizePackVariants(source.packVariants),
 		colourScheme: normalizeColourScheme(source.colourScheme),
 		logLevel: normalizeLogLevel(source.logLevel),
 		features: normalizeFeatures(features),

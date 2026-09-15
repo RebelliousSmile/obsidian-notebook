@@ -53,7 +53,7 @@ const css = readFileSync("src/styles/_note-background.scss", "utf8");
 assert.match(css, /\.markdown-source-view/);
 assert.match(css, /\.markdown-reading-view/);
 assert.match(css, /background-image:\s*none\s*!important/);
-assert.match(css, /opacity:\s*var\(--brumes-note-background-opacity\)/);
+assert.match(css, /opacity:\s*var\(--notebook-note-background-opacity\)/);
 assert.match(css, /pointer-events:\s*none/);
 
 console.log("note-local backgrounds: green");

@@ -1,8 +1,8 @@
 /**
- * Reading a game pack written as a document.
+ * Reading a pack pack written as a document.
  *
  * The shape is the one published beside the content schemas, as
- * `appearance/game-pack.schema.json` in schema-in-the-mist. The plugin depends
+ * `appearance/pack-pack.schema.json` in schema-in-the-mist. The plugin depends
  * on no remote repository to read it: the contract is honoured by the shape of
  * the data, never by a fetch or an import, so a pack loads with the network
  * down and with the schema repository unreachable.
@@ -26,18 +26,18 @@ import {
 } from "../features/blocks/shape";
 import { logScope } from "../utils/logger";
 import {
-	GameAssets,
-	GameFontFace,
-	GamePack,
-	GamePolarity,
-	GameStyleLayer,
-	GameStyleTokens,
-	GameStyleValues,
-	isGamePolarity,
-	isValidGamePackId,
+	StyleAssets,
+	StyleFontFace,
+	StylePack,
+	StylePolarity,
+	StyleLayer,
+	StyleTokens,
+	StyleValues,
+	isStylePolarity,
+	isValidStylePackId,
 } from "./types";
 
-const log = logScope("Games");
+const log = logScope("Packs");
 
 /** The fields a document may carry, by the level they sit at. */
 const PACK_FIELDS = ["id", "label", "style", "polarities", "assets", "shapes"];
@@ -75,12 +75,12 @@ function reportUnknown(where: string, names: string[]): void {
 }
 
 /** Exposed for the throwaway harness, which asserts the once-per-session rule. */
-export function resetGamePackReports(): void {
+export function resetStylePackReports(): void {
 	reported.length = 0;
 }
 
 /** A fresh one each time: a layer read from a document is never shared. */
-function emptyLayer(): GameStyleLayer {
+function emptyLayer(): StyleLayer {
 	return { note: {}, workspace: {} };
 }
 
@@ -130,7 +130,7 @@ function unknownFields(
  */
 const SAFE_TOKEN_NAME = /^--[a-zA-Z0-9-]+$/;
 
-export function readPackTokens(value: unknown, where: string): GameStyleTokens {
+export function readPackTokens(value: unknown, where: string): StyleTokens {
 	if (!isRecord(value)) {
 		if (value !== undefined) {
 			log.warn(`Ignoring "${where}": not an object.`);
@@ -139,7 +139,7 @@ export function readPackTokens(value: unknown, where: string): GameStyleTokens {
 		return {};
 	}
 
-	const tokens: GameStyleTokens = {};
+	const tokens: StyleTokens = {};
 	const rejected: string[] = [];
 
 	for (const name of Object.keys(value)) {
@@ -266,7 +266,7 @@ export function readShapeOverrides(
 	return shapes;
 }
 
-function readLayer(value: unknown, where: string): GameStyleLayer {
+function readLayer(value: unknown, where: string): StyleLayer {
 	if (!isRecord(value)) {
 		if (value !== undefined) {
 			log.warn(`Ignoring "${where}" in a pack document: not an object.`);
@@ -283,7 +283,7 @@ function readLayer(value: unknown, where: string): GameStyleLayer {
 	};
 }
 
-function readStyle(value: unknown): GameStyleValues {
+function readStyle(value: unknown): StyleValues {
 	if (!isRecord(value)) {
 		if (value !== undefined) {
 			log.warn('Ignoring "style" in a pack document: not an object.');
@@ -305,7 +305,7 @@ function readStyle(value: unknown): GameStyleValues {
 	};
 }
 
-function readFontFace(value: unknown, where: string): string | GameFontFace | null {
+function readFontFace(value: unknown, where: string): string | StyleFontFace | null {
 	const file = asText(value);
 
 	if (file) {
@@ -324,7 +324,7 @@ function readFontFace(value: unknown, where: string): string | GameFontFace | nu
 		return null;
 	}
 
-	const face: GameFontFace = { file: path };
+	const face: StyleFontFace = { file: path };
 	const weight = asText(value.weight);
 	const style = asText(value.style);
 
@@ -358,15 +358,15 @@ function readImages(value: unknown): Record<string, string> | undefined {
 		}
 	}
 
-	// An empty record is kept rather than dropped: a game that declares it
-	// draws with nothing is not a game that never mentioned its art, and the
+	// An empty record is kept rather than dropped: a pack that declares it
+	// draws with nothing is not a pack that never mentioned its art, and the
 	// fallbacks read the difference.
 	return images;
 }
 
 function readFonts(
 	value: unknown,
-): Record<string, string | GameFontFace> | undefined {
+): Record<string, string | StyleFontFace> | undefined {
 	if (!isRecord(value)) {
 		if (value !== undefined) {
 			log.warn('Ignoring "assets.fonts" in a pack document: not an object.');
@@ -375,7 +375,7 @@ function readFonts(
 		return undefined;
 	}
 
-	const fonts: Record<string, string | GameFontFace> = {};
+	const fonts: Record<string, string | StyleFontFace> = {};
 
 	for (const family of Object.keys(value)) {
 		const face = readFontFace(value[family], `assets.fonts.${family}`);
@@ -402,7 +402,7 @@ function readStylesheets(value: unknown): string[] | undefined {
 	return sheets;
 }
 
-function readAssets(value: unknown): GameAssets | undefined {
+function readAssets(value: unknown): StyleAssets | undefined {
 	if (!isRecord(value)) {
 		if (value !== undefined) {
 			log.warn('Ignoring "assets" in a pack document: not an object.');
@@ -413,7 +413,7 @@ function readAssets(value: unknown): GameAssets | undefined {
 
 	reportUnknown("assets", unknownFields(value, ASSET_FIELDS));
 
-	const assets: GameAssets = {};
+	const assets: StyleAssets = {};
 	const root = asText(value.root);
 
 	if (root) {
@@ -449,9 +449,9 @@ function readAssets(value: unknown): GameAssets | undefined {
  * label falls back on the identifier rather than on a literal: a pack amputated
  * of its display name still names itself in the settings.
  */
-export function readGamePack(source: unknown): GamePack | null {
+export function readStylePack(source: unknown): StylePack | null {
 	if (!isRecord(source)) {
-		log.error("Ignoring a game pack document: not an object.");
+		log.error("Ignoring a pack pack document: not an object.");
 		return null;
 	}
 
@@ -462,16 +462,16 @@ export function readGamePack(source: unknown): GamePack | null {
 	// to name it.
 	const declared = String(document.id);
 
-	if (!isValidGamePackId(id)) {
+	if (!isValidStylePackId(id)) {
 		log.error(
-			`Ignoring a game pack document: "${declared}" is not a valid identifier — lowercase letters, digits and single hyphens only.`,
+			`Ignoring a pack pack document: "${declared}" is not a valid identifier — lowercase letters, digits and single hyphens only.`,
 		);
 		return null;
 	}
 
 	reportUnknown(`pack "${id}"`, unknownFields(document, PACK_FIELDS));
 
-	const pack: GamePack = {
+	const pack: StylePack = {
 		id,
 		label: asText(document.label) || id,
 		style: readStyle(document.style),
@@ -514,7 +514,7 @@ export function readGamePack(source: unknown): GamePack | null {
 export function readPolarities(
 	value: unknown,
 	where: string,
-): GamePolarity[] | null {
+): StylePolarity[] | null {
 	if (value === undefined) {
 		return null;
 	}
@@ -524,11 +524,11 @@ export function readPolarities(
 		return null;
 	}
 
-	const polarities: GamePolarity[] = [];
+	const polarities: StylePolarity[] = [];
 	const strays: string[] = [];
 
 	for (const entry of value) {
-		if (!isGamePolarity(entry)) {
+		if (!isStylePolarity(entry)) {
 			strays.push(String(entry));
 			continue;
 		}
@@ -550,15 +550,15 @@ export function readPolarities(
  * document without being retyped. It is what proves the two forms are the same
  * format: reading back what this writes gives the pack it came from.
  */
-export function toGamePackDocument(pack: GamePack): Record<string, unknown> {
+export function toStylePackDocument(pack: StylePack): Record<string, unknown> {
 	const style: Record<string, unknown> = {};
 
 	for (const layerName of STYLE_FIELDS) {
-		const layer = pack.style[layerName as keyof GameStyleValues];
+		const layer = pack.style[layerName as keyof StyleValues];
 		const slots: Record<string, unknown> = {};
 
 		for (const slotName of LAYER_FIELDS) {
-			const tokens = layer[slotName as keyof GameStyleLayer];
+			const tokens = layer[slotName as keyof StyleLayer];
 
 			if (tokens && Object.keys(tokens).length > 0) {
 				slots[slotName] = tokens;
