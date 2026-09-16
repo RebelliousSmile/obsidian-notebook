@@ -28,7 +28,7 @@ function reportConflictOnce(id: string, message: string): void {
 	log.error(message);
 }
 
-/** Notebook owns renderers, never pack design: packs are installed data. */
+/** Built-in packs are available in every vault; local packs may extend them. */
 const DECLARED_PACKS: PackRegistration[] = [
 	{ pack: gestionProjetPack },
 	{ pack: clientGuidePack },

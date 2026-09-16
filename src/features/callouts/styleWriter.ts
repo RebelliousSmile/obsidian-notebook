@@ -1,11 +1,15 @@
 import { CalloutDefinition, CalloutFontRole } from "./types";
 
-/**
- * A hex value never legitimately closes a declaration or a block, same
- * guard as `styleElement.ts`'s `sanitizeValue` for pack tokens.
- */
-function sanitizeHex(hex: string): string {
-	return hex.replace(/[{};<>]/g, "").trim();
+/** Obsidian uses an RGB triplet for --callout-color. */
+function calloutRgb(hex: string): string | null {
+	const match = /^#?([\da-f]{3}|[\da-f]{6})$/i.exec(hex.trim());
+	if (!match) return null;
+
+	const digits = match[1];
+	const pairs = digits.length === 3
+		? Array.from(digits, (digit) => digit + digit)
+		: [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 6)];
+	return pairs.map((pair) => parseInt(pair, 16)).join(", ");
 }
 
 function fontVariable(font: CalloutFontRole): string {
@@ -30,7 +34,8 @@ export function buildCalloutStyleCss(callouts: CalloutDefinition[]): string {
 		const declarations = [`\tfont-family: ${fontVariable(entry.font)};`];
 
 		if (entry.color.kind === "fixed") {
-			declarations.push(`\tbackground-color: ${sanitizeHex(entry.color.hex)};`);
+			const rgb = calloutRgb(entry.color.hex);
+			if (rgb) declarations.push(`\t--callout-color: ${rgb};`);
 		} else {
 			declarations.push("\tbackground-color: var(--background-secondary);");
 		}

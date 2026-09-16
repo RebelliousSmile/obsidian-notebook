@@ -12,7 +12,6 @@ import {
 	normalizePackVariantId,
 } from "../packs/registry";
 import { logScope } from "../utils/logger";
-import { SchemaSource, SchemaSourceReference, isSafeSchemaSourceRepository, schemaSourceId } from "../packs/sources";
 
 export { sanitizeAlias, sanitizeAliases };
 
@@ -40,7 +39,6 @@ export interface NotebookSettings {
 	logLevel: LogLevel;
 	features: NotebookFeatureSettings;
 	callouts: CalloutDefinition[];
-	schemaSources: SchemaSource[];
 }
 
 export const DEFAULT_SETTINGS: NotebookSettings = {
@@ -52,32 +50,7 @@ export const DEFAULT_SETTINGS: NotebookSettings = {
 		workspaceTheme: true,
 	},
 	callouts: NATIVE_CALLOUTS,
-	schemaSources: [],
 };
-
-function normalizeSourceReference(value: unknown): SchemaSourceReference | null {
-	if (typeof value !== "object" || value === null) return null;
-	const source = value as Record<string, unknown>;
-	if (source.kind === "latest") return { kind: "latest" };
-	if ((source.kind === "tag" || source.kind === "branch") && typeof source.value === "string" && source.value.trim()) return { kind: source.kind, value: source.value.trim() };
-	return null;
-}
-
-function normalizeSchemaSources(value: unknown): SchemaSource[] {
-	if (!Array.isArray(value)) return [];
-	const sources: SchemaSource[] = [];
-	for (const entry of value) {
-		if (typeof entry !== "object" || entry === null) continue;
-		const source = entry as Record<string, unknown>;
-		if (!isSafeSchemaSourceRepository(source.repository)) continue;
-		const reference = normalizeSourceReference(source.reference);
-		if (!reference) continue;
-		const repository = source.repository;
-		if (sources.some((known) => known.repository.toLowerCase() === repository.toLowerCase())) continue;
-		sources.push({ repository, id: schemaSourceId(repository), reference });
-	}
-	return sources;
-}
 
 const LOG_LEVELS: LogLevel[] = ["none", "error", "warn", "info", "debug"];
 const COLOUR_SCHEMES: ColourScheme[] = ["obsidian", "light", "dark"];
@@ -89,7 +62,7 @@ export function normalizeMode(mode: unknown): StylePackId {
 
 	if (typeof mode === "string" && mode.length > 0) {
 		modeLog.warn(
-			`No pack pack answers to "${mode}". Notebook is using its neutral appearance; reinstall the source that provided this pack if needed.`,
+			`No pack answers to "${mode}". Notebook is using the default pack.`,
 		);
 	}
 
@@ -169,6 +142,5 @@ export function normalizeSettings(
 		logLevel: normalizeLogLevel(source.logLevel),
 		features: normalizeFeatures(features),
 		callouts: normalizeCallouts(source.callouts),
-		schemaSources: normalizeSchemaSources(source.schemaSources),
 	};
 }

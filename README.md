@@ -1,14 +1,12 @@
 # Notebook
 
-Notebook is an Obsidian plugin host for versioned, swappable **style packs**. It ships with two native packs built in and active from the first launch — **Gestion de projet** (`gestion-projet`) and **Guide client** (`client-guide`) — and lets you register further, third-party packs from public GitHub schema repositories.
+Notebook is an Obsidian plugin with two built-in, swappable **style packs**: **Gestion de projet** (`gestion-projet`) and **Guide client** (`client-guide`). Gestion de projet is selected on first launch.
 
 It started as a fork of [Brumes](https://github.com/4rtamis/obsidian-brumes) by [4rtamis](https://github.com/4rtamis), continued as [Handbook](https://github.com/RebelliousSmile/obsidian-handbook) by François-Xavier Guillois, and now follows its own road as Notebook, with its tabletop-roleplaying content removed in favour of general-purpose note-taking packs. The settings key names carried over from Handbook are unchanged, so a vault moving over keeps its configuration.
 
 ## Installation
 
-Notebook activates `gestion-projet` on a vault with no prior configuration, with no install step and no network call: the two native packs are part of the plugin code, not installed data.
-
-Third-party packs are added under **Settings → Notebook → Schema sources**. Each source can follow its latest release, an explicit tag or a branch. Network checks happen only after **Install** or **Check** is clicked. Notebook reads the repository's root `notebook.json`, validates every listed `pack.json`, downloads only their declared images and fonts, and atomically replaces the prior source. It never downloads or executes JavaScript, TypeScript or external CSS.
+Notebook activates `gestion-projet` on a vault with no prior configuration, with no install step or network call. The built-in packs are part of Notebook.
 
 ### 1. Prepare a vault
 
@@ -44,35 +42,23 @@ Suggested vault setup:
 3. Enter `RebelliousSmile/obsidian-notebook`.
 4. Install the plugin, then enable `Notebook`.
 
-### 3. Install another schema source
-
-A **Notebook plugin** is a declarative directory discovered when Notebook starts.
-
-Open **Schema sources**, choose **Add source**, enter the public GitHub `owner/repository`, then select latest release, tag or branch. **Save and check** installs every pack listed in its `notebook.json`. Legacy copies under `<configDir>/notebook/packs/` remain readable for migration and offline use.
-
-The modern layout is `packs/<id>/pack.json`. Its images and fonts are resolved inside that plugin directory, from `assets/` by default or from the relative root declared by its manifest. Existing personal packs stored as `packs/*.json` remain supported.
-
-Style packs are data only: Notebook does not execute JavaScript, TypeScript or external CSS from these directories.
-
-### 4. Configure Notebook
+### 3. Configure Notebook
 
 1. Open `Settings -> Notebook`.
-2. Pick your `Style pack`. The rendering follows immediately, with no reload and no preset to import.
+2. Pick your `Pack mode`. The rendering follows immediately, with no reload and no preset to import.
 3. Leave `Colour scheme` on `Follow Obsidian`, or force Notebook's light or dark scheme independently of the vault theme.
 
 The selected style pack styles every open Markdown source, live-preview and reading view in that window. It does not repaint the Obsidian chrome unless `Theme the workspace` is enabled. That toggle is independent of the pack and colour-scheme selectors: page textures, title cartouches and warning motifs remain confined to notes even when the workspace colours follow the pack.
 
-### 5. Illustrations and fonts
+### 4. Illustrations and fonts
 
-Notebook does not carry its own art. A schema repository publishes each pack's declared illustrations and fonts beside its `pack.json`; installing or updating the source installs the matching asset version into the vault's durable Notebook data directory.
-
-The `Illustrations` setting names the folder of the active pack, counts the files it reads, and lists the ones it did not find; `Check files` looks again after a drop, with no reload.
+The built-in packs use Notebook's colours and fonts. A local pack can also declare illustrations and fonts in the vault's Notebook data directory.
 
 **Until the files are there, the pack renders degraded, never broken.** A card without its frame keeps its text on a flat ground and a border, a badge without its icon goes away instead of leaving an empty box, a drawn checkbox mark becomes a typed one, and a missing typeface falls through to the next family in its stack. Nothing errors and nothing renders as a broken image.
 
-Repositories are responsible for publishing only assets they may redistribute and for carrying the corresponding licence information.
+Local pack authors are responsible for using assets they may redistribute and carrying the corresponding licence information.
 
-### 6. Note-local backgrounds
+### 5. Note-local backgrounds
 
 A note can use an image already stored in the vault as its page background. This works in Live Preview and reading view, with every style pack, and does not copy the image into Notebook or a schema package.
 

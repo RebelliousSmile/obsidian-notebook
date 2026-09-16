@@ -24,7 +24,9 @@ export function resolveThemeContents(
 	);
 	const requiredCapabilities = registration.installation?.requires ?? [];
 
-	const blocks = NOTEBOOK_BLOCKS.filter((block) => requiredBlocks.has(block.id));
+	const blocks = NOTEBOOK_BLOCKS.filter(
+		(block) => block.mode === packId || requiredBlocks.has(block.id),
+	);
 	return {
 		handouts: blocks.filter((block) => block.handout),
 		callouts: callouts.filter((callout) =>

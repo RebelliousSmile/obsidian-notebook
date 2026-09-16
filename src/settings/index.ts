@@ -16,7 +16,6 @@ import { isCalloutAvailable } from "../features/callouts/types";
 import { calloutCommandName } from "../features/callouts/commands";
 import { CalloutsModal } from "./calloutsModal";
 import { ThemeContentsModal } from "./themeContentsModal";
-import { SchemaSourceModal, SchemaSourceRemovalModal } from "./sourceModal";
 
 const SETTINGS_SAVE_LOG_MESSAGE = "Failed to save Notebook settings";
 const SETTINGS_SAVE_NOTICE = "Failed to save Notebook settings.";
@@ -48,7 +47,7 @@ export class NotebookSettingTab extends PluginSettingTab {
 					if (STYLE_PACKS.length === 0) {
 						drop.addOption("none", "No pack installed");
 					}
-					// The list is the registry: a fourth pack shows up here
+					// The list is the registry: a new pack shows up here
 					// without a line being written, and its name comes from
 					// the data rather than from a string in the interface.
 					for (const pack of STYLE_PACKS) {
@@ -77,11 +76,10 @@ export class NotebookSettingTab extends PluginSettingTab {
 		this.renderPolarities(generalSection);
 		this.renderThemeContents(generalSection);
 		this.renderPersonalOverrides(generalSection);
-		this.renderSchemaSources(generalSection);
 		this.renderGeneralSettings(generalSection);
 
 		const calloutsSection = this.createSection(containerEl);
-		calloutsSection.setHeading("Callouts");
+		calloutsSection.setHeading("Callouts pour ce pack");
 		this.renderCalloutsSection(calloutsSection);
 
 		const advancedSection = this.createSection(containerEl);
@@ -92,34 +90,6 @@ export class NotebookSettingTab extends PluginSettingTab {
 	private redisplay(): void {
 		// eslint-disable-next-line @typescript-eslint/no-deprecated -- Refreshes the pre-1.13 settings UI.
 		this.display();
-	}
-
-	private renderSchemaSources(section: SettingGroup) {
-		const sources = this.plugin.settings.schemaSources;
-		section.addSetting((setting) => {
-			setting
-				.setName("Schema sources")
-				.setDesc(sources.length === 0 ? "No schema repository is registered yet." : `${sources.length} schema ${sources.length === 1 ? "repository is" : "repositories are"} registered.`)
-				.addButton((button) => button.setButtonText("Add source").onClick(() => { new SchemaSourceModal(this.app, this.plugin, null, () => this.redisplay()).open(); }))
-				.addButton((button) => button.setButtonText("Reload installed schemas").onClick(() => {
-					this.runTask(async () => {
-						await this.plugin.reloadInstalledSchemaSources();
-						this.redisplay();
-					}, "Failed to reload schema sources", "Failed to reload schema sources.");
-				}));
-		});
-		for (const source of sources) {
-			section.addSetting((setting) => {
-				setting
-					.setName(source.repository)
-					.setDesc(source.reference.kind === "latest" ? "Latest release" : `${source.reference.kind}: ${source.reference.value}`)
-					.addButton((button) => button.setButtonText("Check").onClick(() => { new SchemaSourceModal(this.app, this.plugin, source, () => this.redisplay()).open(); }))
-					.addButton((button) => {
-						button.buttonEl.classList.add("mod-warning");
-						button.setButtonText("Remove").onClick(() => { new SchemaSourceRemovalModal(this.app, this.plugin, source, () => this.redisplay()).open(); });
-					});
-			});
-		}
 	}
 
 	private renderPackVariant(section: SettingGroup) {
@@ -394,7 +364,7 @@ export class NotebookSettingTab extends PluginSettingTab {
 
 	private calloutScopeLabel(scope: string): string {
 		if (scope === "all") {
-			return "Tous les jeux";
+			return "Tous les packs";
 		}
 		const pack = STYLE_PACKS.find((p) => p.id === scope);
 		return pack?.label ?? scope;

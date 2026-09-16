@@ -2,8 +2,17 @@ import assert from "node:assert/strict";
 import { log } from "../src/utils/logger";
 import { NATIVE_CALLOUTS } from "../src/features/callouts/nativeCallouts";
 import { normalizeSettings } from "../src/settings/types";
+import { buildCalloutStyleCss } from "../src/features/callouts/styleWriter";
 
 log.setLevel("warn");
+
+// Fixed colours should feed Obsidian's native callout tint and title colour,
+// rather than painting an opaque panel behind dark text.
+{
+	const css = buildCalloutStyleCss(NATIVE_CALLOUTS);
+	assert.match(css, /\.callout\[data-notebook-callout-style="note"\]\s*\{[^}]*--callout-color:\s*76, 110, 245;/);
+	assert.doesNotMatch(css, /background-color:\s*#4c6ef5;/);
+}
 
 // Fresh vault: no calloutAliases, no callouts -> all native entries with
 // their default aliases.

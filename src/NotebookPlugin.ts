@@ -26,15 +26,8 @@ import {
 	resolveStylePack,
 	resolvePackRegistration,
 } from "./packs/registry";
-import { loadCustomStylePacks, loadSchemaSourceStylePacks } from "./packs/customPacks";
-import {
-	preparePackStorage,
-	removeSchemaSourceStorage,
-} from "./packs/storage";
-import { resolveGithubSource } from "./packs/githubSources";
-import { installResolvedSchemaSource } from "./packs/sourceInstaller";
-import { SchemaSource } from "./packs/sources";
-import { installStarterKitSources, type StarterKit } from "./packs/starterKits";
+import { loadCustomStylePacks } from "./packs/customPacks";
+import { preparePackStorage } from "./packs/storage";
 import {
 	EMPTY_OVERRIDE,
 	PackOverride,
@@ -54,7 +47,6 @@ import { registerNotebookContextMenu } from "./contextMenu";
 import { loadCalloutAliasFeature } from "./features/callouts/aliasSupport";
 import { buildCalloutStyleCss } from "./features/callouts/styleWriter";
 import { clearCalloutCommands, syncCalloutCommands } from "./features/callouts/commands";
-import { StarterKitModal } from "./settings/starterKitModal";
 import {
 	clearNoteBackground,
 	refreshNoteBackground,
@@ -72,7 +64,6 @@ export default class NotebookPlugin extends Plugin {
 	private readonly styleWriter = new StyleWriter();
 	private overrides: PackOverride = EMPTY_OVERRIDE;
 	private assets: PackAssetState = emptyAssetState("");
-	private starterKitPrompted = false;
 
 	async onload() {
 		await preparePackStorage(this);
@@ -133,7 +124,6 @@ export default class NotebookPlugin extends Plugin {
 			// The vault does not watch Notebook's config data, so overrides and
 			// illustrations are read once here and on demand afterwards.
 			void this.reloadStyleSources();
-			void this.promptForStarterKit();
 		});
 	}
 
@@ -162,60 +152,15 @@ export default class NotebookPlugin extends Plugin {
 		this.applySettings(options);
 	}
 
-	/** Rebuild the live registry after a managed source changes on disk. */
+	/** Rebuild the live registry from Notebook's packs and local pack files. */
 	async refreshPackRegistry() {
 		const customPacks = await loadCustomStylePacks(this);
-		const sourcePacks = await loadSchemaSourceStylePacks(this);
-		initPackRegistry([...customPacks, ...sourcePacks]);
+		initPackRegistry(customPacks);
 		if (this.settings) {
 			this.settings = normalizeSettings(this.settings);
 			this.assets = emptyAssetState("");
 			this.applySettings({ refreshMarkdown: true });
 		}
-	}
-
-	/** Fetch every registered schema source again, then rebuild the live packs. */
-	async reloadInstalledSchemaSources() {
-		for (const source of this.settings.schemaSources) {
-			const resolved = await resolveGithubSource(source);
-			await installResolvedSchemaSource(this, source, resolved);
-		}
-		await this.refreshPackRegistry();
-	}
-
-	async saveSchemaSource(source: SchemaSource, replacingRepository: string | null) {
-		const resolved = await resolveGithubSource(source);
-		await installResolvedSchemaSource(this, source, resolved);
-		const sources = this.settings.schemaSources.filter((known) => known.repository.toLowerCase() !== (replacingRepository ?? source.repository).toLowerCase() && known.repository.toLowerCase() !== source.repository.toLowerCase());
-		sources.push(source);
-		this.settings.schemaSources = sources;
-		await this.saveData(this.settings);
-		await this.refreshPackRegistry();
-	}
-
-	async removeSchemaSource(source: SchemaSource) {
-		await removeSchemaSourceStorage(this, source.id);
-		this.settings.schemaSources = this.settings.schemaSources.filter(
-			(known) => known.id !== source.id,
-		);
-		await this.refreshPackRegistry();
-		await this.saveData(this.settings);
-	}
-
-
-	async installStarterKit(starterKit: StarterKit) {
-		await installStarterKitSources(starterKit, (source) => this.saveSchemaSource(source, null));
-		if (resolveStylePack(starterKit.initialMode).id === starterKit.initialMode) {
-			this.settings.mode = starterKit.initialMode;
-			await this.saveData(this.settings);
-			this.applySettings({ refreshMarkdown: true });
-		}
-	}
-
-	private async promptForStarterKit() {
-		if (this.starterKitPrompted || STYLE_PACKS.length > 0) return;
-		this.starterKitPrompted = true;
-		new StarterKitModal(this.app, this).open();
 	}
 
 	private applySettings(options: ApplySettingsOptions = {}) {
