@@ -1,6 +1,6 @@
 import { parse as parseToml } from "smol-toml";
 import { BlockShape, renderZones } from "../blocks/shape";
-import { NotebookBlock } from "../blocks/types";
+import { BlockRenderContext, NotebookBlock } from "../blocks/types";
 
 export interface EmailSignature {
 	name: string | null;
@@ -35,7 +35,7 @@ export const emailBlockShape: BlockShape = {
 				"les champs d'en-tête renseignés (De, À, Cc, Cci, Date, PJ), un par ligne, chacun avec son libellé ; un champ vide n'est pas dessiné",
 			optional: true,
 		},
-		{ name: "body", holds: "le corps du message, paragraphes et retours à la ligne conservés", optional: true },
+		{ name: "body", holds: "le corps du message, rendu en Markdown (liens, gras, images), retours à la ligne conservés", optional: true },
 		{
 			name: "signature",
 			holds: "les coordonnées de la signature, une par ligne, en pied du courriel",
@@ -43,7 +43,7 @@ export const emailBlockShape: BlockShape = {
 		},
 	],
 	gaps: [
-		"Le corps est du texte brut : pas de rendu Markdown ni de liens cliquables dans le message.",
+		"Le corps est rendu comme du Markdown par Obsidian (liens, gras, images, listes) ; sans hôte, il reste du texte brut.",
 		"Les libellés des champs (De, À, Cc…) sont fixes ; un pack ne peut pas les renommer un par un.",
 	],
 };
@@ -152,7 +152,18 @@ function parse(source: string): EmailData | null {
 	};
 }
 
-function line(doc: Document, className: string, label: string | null, value: string): HTMLElement {
+/** An attachment written as a bare file name becomes an internal link; links already written are kept. */
+function attachmentLink(item: string): string {
+	return /\[\[|\]\(|^[a-z][a-z0-9+.-]*:\/\//i.test(item) ? item : `[[${item}]]`;
+}
+
+function line(
+	doc: Document,
+	className: string,
+	label: string | null,
+	value: string,
+	markdown?: { text: string; context: BlockRenderContext },
+): HTMLElement {
 	const row = doc.createElement("div");
 	row.classList.add(className);
 
@@ -165,13 +176,19 @@ function line(doc: Document, className: string, label: string | null, value: str
 
 	const content = doc.createElement("span");
 	content.classList.add(`${className}-value`);
-	content.textContent = value;
+
+	if (markdown) {
+		markdown.context.renderMarkdown(markdown.text, content);
+	} else {
+		content.textContent = value;
+	}
+
 	row.appendChild(content);
 
 	return row;
 }
 
-function render(data: EmailData, doc: Document): HTMLElement {
+function render(data: EmailData, doc: Document, context?: BlockRenderContext): HTMLElement {
 	const root = emailBlockShape.root;
 	const container = doc.createElement("div");
 	container.classList.add(root);
@@ -204,7 +221,14 @@ function render(data: EmailData, doc: Document): HTMLElement {
 			const block = doc.createElement("div");
 
 			for (const [label, value] of present) {
-				block.appendChild(line(doc, `${root}-field`, label, value as string));
+				const links =
+					context && label === "PJ"
+						? {
+								text: data.attachments.map(attachmentLink).join(", "),
+								context,
+							}
+						: undefined;
+				block.appendChild(line(doc, `${root}-field`, label, value as string, links));
 			}
 
 			return block;
@@ -215,7 +239,13 @@ function render(data: EmailData, doc: Document): HTMLElement {
 			}
 
 			const body = doc.createElement("div");
-			body.textContent = data.body;
+
+			if (context) {
+				context.renderMarkdown(data.body, body);
+			} else {
+				body.textContent = data.body;
+			}
+
 			return body;
 		},
 		signature: () => {

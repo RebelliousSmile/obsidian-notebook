@@ -72,6 +72,14 @@ assert.deepEqual(names, [
 	"notebook-email--signature",
 ]);
 
+const rendered: string[] = [];
+const hosted = emailBlock.render(full, doc, {
+	renderMarkdown: (markdown) => rendered.push(markdown),
+}) as unknown as FakeElement;
+// The attachment becomes an internal link, then the body is rendered.
+assert.deepEqual(rendered, ["[[devis.pdf]]", "Bonjour,\n\nMerci."]);
+assert.equal(hosted.children[2].textContent, "");
+
 const fields = zones[1].children.map((row) => row.children[0].textContent);
 assert.deepEqual(fields, ["De", "À", "Cc", "Date", "PJ"]);
 

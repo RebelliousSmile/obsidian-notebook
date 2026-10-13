@@ -12,6 +12,8 @@ writeFileSync(
 	stub,
 	`export class Notice { constructor() {} }
 export class Menu {}
+export class MarkdownRenderChild {}
+export class MarkdownRenderer {}
 export class MenuItem {}
 export class Editor {}
 export class Plugin {}

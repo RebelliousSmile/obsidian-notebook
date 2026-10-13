@@ -1,10 +1,10 @@
-import { Editor, Menu, MenuItem } from "obsidian";
+import { Editor, MarkdownRenderChild, MarkdownRenderer, Menu, MenuItem } from "obsidian";
 import type NotebookPlugin from "../../NotebookPlugin";
 import { findPackRegistration, stylePackClass } from "../../packs/registry";
 import { NotebookSettings } from "../../settings/types";
 import { logScope } from "../../utils/logger";
 import { renderRawBlock } from "./fallback";
-import { NotebookBlock, blockIds, isBlockEnabled } from "./types";
+import { BlockRenderContext, NotebookBlock, blockIds, isBlockEnabled } from "./types";
 import { BLOCK_SCOPE_CLASS } from "../modes/domModeClass";
 import { statusBlock } from "../status/block";
 import { emailBlock } from "../email/block";
@@ -77,7 +77,20 @@ export function loadNotebookBlocks(plugin: NotebookPlugin): void {
 
 				log.debug(`Rendering ${id}:`, parsed);
 				el.classList.add(BLOCK_SCOPE_CLASS, stylePackClass(plugin.settings.mode));
-				el.appendChild(block.render(parsed, el.doc));
+				const child = new MarkdownRenderChild(el);
+				ctx.addChild(child);
+				const context: BlockRenderContext = {
+					renderMarkdown: (markdown, into) => {
+						void MarkdownRenderer.render(
+							plugin.app,
+							markdown,
+							into,
+							ctx.sourcePath,
+							child,
+						);
+					},
+				};
+				el.appendChild(block.render(parsed, el.doc, context));
 			});
 		}
 	}

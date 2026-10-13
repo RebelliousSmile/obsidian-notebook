@@ -47,11 +47,36 @@
 .notebook-email-field-value {
 	min-width: 0;
 	overflow-wrap: anywhere;
+
+	// Rendered Markdown (attachment links) wraps its text in a paragraph.
+	p {
+		margin: 0;
+	}
 }
 
+// The body is rendered Markdown (or plain text without a host): single line
+// breaks are kept, as in a mail client, and the block's own margins are tightened.
 .notebook-email--body {
 	padding: 0.7em 0.9em;
 	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+
+	p,
+	ul,
+	ol {
+		margin: 0 0 0.6em;
+		white-space: pre-wrap;
+	}
+
+	> :last-child,
+	p:last-child {
+		margin-bottom: 0;
+	}
+
+	img {
+		max-width: 100%;
+		height: auto;
+	}
 }
 
 .notebook-email--signature {

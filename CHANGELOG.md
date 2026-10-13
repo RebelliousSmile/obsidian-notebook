@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Notebook is a fork of [Handbook](https://github.com/RebelliousSmile/obsidian-handbook), itself a fork of [Brumes](https://github.com/4rtamis/obsidian-brumes). Handbook's full history up to 2.8.6, the revision this fork started from, is preserved in its own repository and is not repeated here.
 
+## [Unreleased]
+
+### Changed
+
+- The `email` block body is rendered as Markdown by Obsidian (links, bold, images, lists) instead of being shown as raw text. Blocks receive an optional render context for this; without a host the body stays plain text.
+- The `email` block attachments (`PJ`) are drawn as internal links; an entry already written as a `[[wikilink]]`, a Markdown link or a URL is kept as is.
+
 ## [0.2.0]
 
 ### Added

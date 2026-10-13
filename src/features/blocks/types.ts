@@ -6,6 +6,15 @@ import type {
 import type { BlockShape } from "./shape";
 
 /**
+ * What the host offers a block while it is drawn. Optional on purpose: a block
+ * must still render (as plain text) where no host is around, e.g. in tests.
+ */
+export interface BlockRenderContext {
+	/** Render Markdown into `into` the way Obsidian would, links and images included. */
+	renderMarkdown(markdown: string, into: HTMLElement): void;
+}
+
+/**
  * Everything a fenced Notebook block needs: how it is written, when it is
  * active, how it is parsed, how it is rendered, and how it is inserted.
  */
@@ -36,7 +45,7 @@ export interface NotebookBlock<T> {
 	 */
 	shape: BlockShape;
 	parse(source: string): T | null;
-	render(data: T, doc: Document): HTMLElement;
+	render(data: T, doc: Document, context?: BlockRenderContext): HTMLElement;
 	template(): string;
 }
 
