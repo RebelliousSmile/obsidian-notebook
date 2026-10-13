@@ -1,0 +1,90 @@
+// The `email` block's anatomy — structural, and independent of the active
+// pack, like `_status.scss`. Colours come from Obsidian's own variables so the
+// block follows the pack's scheme without owning a value of its own.
+
+.notebook-email {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: var(--radius-m, 6px);
+	background: var(--background-secondary);
+	overflow: hidden;
+	container-type: inline-size;
+}
+
+.notebook-email--subject {
+	padding: 0.5em 0.9em;
+	font-weight: var(--font-semibold, 600);
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+// Compact header: fields flow in two columns, label then value in each cell.
+// A narrow note falls back to one column rather than clipping an address.
+.notebook-email--fields,
+.notebook-email--signature-contacts {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.1em 1.5em;
+	line-height: 1.35;
+}
+
+.notebook-email--fields {
+	padding: 0.5em 0.9em;
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.notebook-email-field {
+	display: flex;
+	gap: 0.6em;
+	min-width: 0;
+}
+
+.notebook-email-field-label {
+	flex: none;
+	min-width: 2.6em;
+	color: var(--text-muted);
+	font-weight: var(--font-semibold, 600);
+}
+
+.notebook-email-field-value {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.notebook-email--body {
+	padding: 0.7em 0.9em;
+	white-space: pre-wrap;
+}
+
+.notebook-email--signature {
+	padding: 0.5em 0.9em;
+	border-top: 1px solid var(--background-modifier-border);
+	color: var(--text-muted);
+	font-size: 0.9em;
+	line-height: 1.35;
+}
+
+.notebook-email--signature-contacts {
+	margin-top: 0.25em;
+}
+
+.notebook-email-signature-line {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.notebook-email-signature-name {
+	color: var(--text-normal);
+	font-weight: var(--font-semibold, 600);
+}
+
+.notebook-email-signature-line-label {
+	margin-right: 0.5em;
+	font-weight: var(--font-semibold, 600);
+}
+
+// Last, so it wins over the two-column declaration above at equal specificity.
+@container (max-width: 30em) {
+	.notebook-email--fields,
+	.notebook-email--signature-contacts {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

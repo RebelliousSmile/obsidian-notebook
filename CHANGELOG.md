@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Notebook is a fork of [Handbook](https://github.com/RebelliousSmile/obsidian-handbook), itself a fork of [Brumes](https://github.com/4rtamis/obsidian-brumes). Handbook's full history up to 2.8.6, the revision this fork started from, is preserved in its own repository and is not repeated here.
 
+## [0.2.0]
+
+### Added
+
+- `email` block: a fenced block whose content is TOML (`subject`, `from`, `to`, `cc`, `bcc`, `date`, `attachments`, `body`, and a `[signature]` table). It draws the subject, the header fields and the signature contacts on two columns, and falls back to one column in a narrow note. Active in the `gestion-projet` pack, inserted from the editor context menu as "Courriel".
+- `assert:email` harness covering the TOML parsing and the zones the block draws.
+
+### Fixed
+
+- The "features" modal of a pack lists the code blocks activated by its mode, not only those declared through a `block:` capability.
+
 ## [0.1.0]
 
 ### Changed
