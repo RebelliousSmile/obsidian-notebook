@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-notebook",
 	"name": "Notebook",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"minAppVersion": "1.12.7",
 	"description": "Style packs, callouts, and blocks for Obsidian note-taking vaults.",
 	"author": "François-Xavier Guillois",
