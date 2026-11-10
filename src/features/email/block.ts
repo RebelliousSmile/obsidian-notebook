@@ -244,6 +244,7 @@ function render(data: EmailData, doc: Document, context?: BlockRenderContext): H
 				context.renderMarkdown(data.body, body);
 			} else {
 				body.textContent = data.body;
+				body.classList.add(`${root}-body-plain`);
 			}
 
 			return body;

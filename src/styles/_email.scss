@@ -54,18 +54,17 @@
 	}
 }
 
-// The body is rendered Markdown (or plain text without a host): single line
-// breaks are kept, as in a mail client, and the block's own margins are tightened.
+// The body is rendered Markdown: Obsidian already turns single line breaks into
+// <br>, so whitespace stays normal — pre-wrap would also show the newline that
+// follows each <br>, doubling every line. Plain text (no host) keeps its breaks.
 .notebook-email--body {
 	padding: 0.7em 0.9em;
-	white-space: pre-wrap;
 	overflow-wrap: anywhere;
 
 	p,
 	ul,
 	ol {
 		margin: 0 0 0.6em;
-		white-space: pre-wrap;
 	}
 
 	> :last-child,
@@ -77,6 +76,10 @@
 		max-width: 100%;
 		height: auto;
 	}
+}
+
+.notebook-email-body-plain {
+	white-space: pre-wrap;
 }
 
 .notebook-email--signature {
